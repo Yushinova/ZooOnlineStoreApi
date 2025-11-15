@@ -1,0 +1,13 @@
+﻿using ZooOnlineStoreApi.Model.Users;
+
+namespace ZooOnlineStoreApi.Model.Interfaces
+{
+    public interface IRepository<T> where T : class
+    {
+        Task<T?> GetByIdAsync(int id);
+        Task InsertAsync(T entity);
+        Task<List<T>> SelectAllAsync();
+        Task UpdateAsync(T entity);
+        Task DeleteAsynk(T entity);
+    }
+}

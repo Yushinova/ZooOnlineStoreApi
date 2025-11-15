@@ -1,0 +1,19 @@
+
+services:
+  app:
+    container_name: zoo-online-store
+    build:
+      context: .
+      dockerfile: ./ZooOnlineStoreApi/Dockerfile
+    ports:
+      - "8080:8080"
+
+  db:
+    container_name: zoo_store_db
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=zoo_store_db
+    ports:
+      - "5432:5432"

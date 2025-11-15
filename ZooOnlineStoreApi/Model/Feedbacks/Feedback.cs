@@ -1,0 +1,24 @@
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using ZooOnlineStoreApi.Model.Products;
+using ZooOnlineStoreApi.Model.Users;
+
+namespace ZooOnlineStoreApi.Model.Feedbacks
+{
+    public class Feedback
+    {
+        public int Id { get; set; }
+        public string Content { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        //связи
+        public int UserId { get; set; }
+        [ForeignKey (nameof (UserId))]
+        public User? User { get; set; }
+        public int ProductId { get; set; }
+        [ForeignKey (nameof (ProductId))]
+        public Product? Product { get; set; }
+        public Feedback() { }
+       
+    }
+}
