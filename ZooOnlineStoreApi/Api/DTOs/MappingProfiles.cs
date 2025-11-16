@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
+using ZooOnlineStoreApi.Model.Addresses;
 using ZooOnlineStoreApi.Model.Categories;
 using ZooOnlineStoreApi.Model.Feedbacks;
 using ZooOnlineStoreApi.Model.PetTypes;
@@ -27,6 +28,9 @@ namespace ZooOnlineStoreApi.Api.DTOs
             CreateMap<ProductImageRequest, ProductImage>();
             CreateMap<Feedback, FeedbackResponse>();
             CreateMap<User, UserResponse>();
+            CreateMap<User, UserAuthResponse>();
+            CreateMap<Address, AddressResponse>();
+            CreateMap<AddressRequest, Address>();
         }
     }
  

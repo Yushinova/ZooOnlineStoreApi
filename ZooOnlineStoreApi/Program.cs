@@ -1,6 +1,7 @@
 using ZooOnlineStoreApi.Api.DTOs;
 using ZooOnlineStoreApi.Api.Middeleware;
 using ZooOnlineStoreApi.Crypto;
+using ZooOnlineStoreApi.Model.Addresses;
 using ZooOnlineStoreApi.Model.Categories;
 using ZooOnlineStoreApi.Model.Interfaces;
 using ZooOnlineStoreApi.Model.PetTypes;
@@ -23,6 +24,8 @@ builder.Services.AddTransient<IProductImageRepository, ProductImageRepository>()
 builder.Services.AddTransient<ProductImageService>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<UserService>();
+builder.Services.AddTransient<IAddressRepository, AddressRepository>();
+builder.Services.AddTransient<AddressService>();
 builder.Services.AddAutoMapper(options => options.AddProfile<MappingProfiles>());
 var app = builder.Build();
 

@@ -53,6 +53,11 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
                 return Conflict(error);
             }
+            catch(Exception ex)
+            {
+                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
+                return BadRequest(error);
+            }
 
         }
         //редактирование

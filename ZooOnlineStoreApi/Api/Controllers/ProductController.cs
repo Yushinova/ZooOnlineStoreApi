@@ -24,22 +24,29 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [HttpPost]
         public async Task<ActionResult> InsertProductAsync([FromBody] ProductRequest request)
         {
-
-            Product productInsert = mapper.Map<Product>(request);
-            if (request.PetTypeIds != null && request.PetTypeIds.Any())
+            try
             {
-                List<PetType> petTypesFromDb = await petTypeService.ListAllAsync();
-                productInsert.PetTypes ??= new HashSet<PetType>();
-                foreach (var item in petTypesFromDb)
+                Product productInsert = mapper.Map<Product>(request);
+                if (request.PetTypeIds != null && request.PetTypeIds.Any())
                 {
-                    if (request.PetTypeIds.Contains(item.Id))
+                    List<PetType> petTypesFromDb = await petTypeService.ListAllAsync();
+                    productInsert.PetTypes ??= new HashSet<PetType>();
+                    foreach (var item in petTypesFromDb)
                     {
-                        productInsert.PetTypes.Add(item);
+                        if (request.PetTypeIds.Contains(item.Id))
+                        {
+                            productInsert.PetTypes.Add(item);
+                        }
                     }
                 }
+                await productService.InsertAsync(productInsert);
+                return Ok(mapper.Map<ProductResponse>(productInsert));
             }
-            await productService.InsertAsync(productInsert);
-            return Ok(mapper.Map<ProductResponse>(productInsert));
+            catch (Exception ex)
+            {
+                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
+                return BadRequest(error);
+            }
 
         }
         [HttpPatch("{id:int}")]
@@ -67,7 +74,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 return Ok(mapper.Map<ProductResponse>(productFromDb));
 
             }
-            catch(NotFoundException ex)
+            catch (NotFoundException ex)
             {
                 ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
                 return NotFound(error);
@@ -106,9 +113,9 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetByIdWithAllInfoAsync(int id)
         {
-                Product? productFromDb = await productService.SelectByIdWithAllInfoAsync(id);
-                return Ok(mapper.Map<ProductResponse>(productFromDb));
-          
+            Product? productFromDb = await productService.SelectByIdWithAllInfoAsync(id);
+            return Ok(mapper.Map<ProductResponse>(productFromDb));
+
         }
 
     }

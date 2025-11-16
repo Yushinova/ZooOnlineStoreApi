@@ -32,6 +32,11 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
                 return NotFound(error);
             }
+            catch(Exception ex)
+            {
+                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
+                return BadRequest(error);
+            }
         }
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteByIdAsync(int id)
