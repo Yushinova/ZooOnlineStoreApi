@@ -2,9 +2,9 @@
 using ZooOnlineStoreApi.Model.OrderItems;
 using ZooOnlineStoreApi.Model.Users;
 
-namespace ZooOnlineStoreApi.Model.Orders
+namespace ZooOnlineStoreApi.Api.DTOs.Responses
 {
-    public class Order
+    public class OrderResponse
     {
         public int Id { get; set; }
         public string OrderNumber { get; set; } = string.Empty;
@@ -13,12 +13,7 @@ namespace ZooOnlineStoreApi.Model.Orders
         public string Status { get; set; } = string.Empty;//Kart, Paid, Processing, Shipped, Delivered, Deleted
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string ShippingAddress { get; set; } = string.Empty;
-        //связи 
-        public int UserId { get; set; }
-
-        [ForeignKey(nameof(UserId))]
-        public User? User { get; set; }
-        public HashSet<OrderItem>? OrderItems { get; set; }
-        public Order() { }
+        public UserOrderResponse? User { get; set; }
+        public List<OrderItemResponse>? OrderItems { get; set; }
     }
 }

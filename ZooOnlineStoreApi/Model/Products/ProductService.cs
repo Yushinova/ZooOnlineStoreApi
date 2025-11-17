@@ -42,6 +42,19 @@ namespace ZooOnlineStoreApi.Model.Products
         {
             return await _products.SelectAllByCategoryAndPetTypeIdAsync(categoryId, petTypeId);
         }
+        public async Task DeleteQuantityByIdAsync(int id, int quantity)
+        {
+            Product? productFromDb = await _products.GetByIdAsync(id);
+            if (productFromDb != null)
+            {
+                if (productFromDb.Quantity >= quantity)
+                {
+                    productFromDb.Quantity -= quantity;
+                }
+                await _products.UpdateAsync(productFromDb);
+            }
+            
+        }
         public async Task UpdateAsync(Product product)
         {
             Product? productFromDb = await _products.SelectByIdWithAllInfo(product.Id);
@@ -51,6 +64,7 @@ namespace ZooOnlineStoreApi.Model.Products
             }
             productFromDb.Name = product.Name;
             productFromDb.Brand = product.Brand;
+            productFromDb.Rating = product.Rating;
             productFromDb.Description = product.Description;
             productFromDb.CostPrice = product.CostPrice;
             productFromDb.Price = product.Price;

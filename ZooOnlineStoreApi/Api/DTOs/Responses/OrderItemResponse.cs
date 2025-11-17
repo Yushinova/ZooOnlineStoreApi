@@ -2,9 +2,9 @@
 using ZooOnlineStoreApi.Model.Orders;
 using ZooOnlineStoreApi.Model.Products;
 
-namespace ZooOnlineStoreApi.Model.OrderItems
+namespace ZooOnlineStoreApi.Api.DTOs.Responses
 {
-    public class OrderItem
+    public class OrderItemResponse
     {
         public int Id { get; set; }
         public int Quantity { get; set; }
@@ -12,12 +12,7 @@ namespace ZooOnlineStoreApi.Model.OrderItems
         public decimal Price { get; set; }
         public string ProductName { get; set; } = string.Empty;
         public int ProductId { get; set; }
-        //связи
         public int OrderId { get; set; }
-
-        [ForeignKey (nameof(OrderId))]
-        public Order? Order { get; set; }
-        public OrderItem() { }
 
     }
 }

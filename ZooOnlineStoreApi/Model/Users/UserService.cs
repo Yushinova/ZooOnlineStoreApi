@@ -70,7 +70,7 @@ namespace ZooOnlineStoreApi.Model.Users
             {
                 throw new NotFoundException();
             }
-            await _userRepository.DeleteAsynk(userFromDb);
+            await _userRepository.DeleteAsync(userFromDb);
         }
         public async Task<User?> GetByIdAsync(int id)
         {

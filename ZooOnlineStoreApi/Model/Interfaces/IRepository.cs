@@ -8,6 +8,6 @@ namespace ZooOnlineStoreApi.Model.Interfaces
         Task InsertAsync(T entity);
         Task<List<T>> SelectAllAsync();
         Task UpdateAsync(T entity);
-        Task DeleteAsynk(T entity);
+        Task DeleteAsync(T entity);
     }
 }

@@ -16,6 +16,7 @@ namespace ZooOnlineStoreApi.Model.Products
         public decimal CostPrice { get; set; }
         public int Quantity { get; set; }
         public string? Brand { get; set; }
+        public double? Rating { get; set; }
         public bool isPromotion { get; set; } = false;
         public bool isActive { get; set; } = true;
         //связи

@@ -23,7 +23,7 @@ namespace ZooOnlineStoreApi.Model.Addresses
             {
                 throw new NotFoundException();
             }
-            await _addressRepository.DeleteAsynk(addressFromDb);
+            await _addressRepository.DeleteAsync(addressFromDb);
         }
         public async Task<List<Address>?> ListAllByUserIdAsync(int id)
         {

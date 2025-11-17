@@ -11,6 +11,7 @@ namespace ZooOnlineStoreApi.Model.Feedbacks
         public int Id { get; set; }
         public string Content { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public int Rating { get; set; } = 0;
         //связи
         public int UserId { get; set; }
         [ForeignKey (nameof (UserId))]

@@ -15,13 +15,13 @@ namespace ZooOnlineStoreApi.Model.Orders
         public async Task<Order?> GetByIdAsync(int id)
         {
             Order? orderFromDb = await _orderRepository.GetByIdAsync(id);
-            if (orderFromDb == null)
-            {
-                throw new NotFoundException();
-            }
             return orderFromDb;
         }
-
+        public async Task<Order?> GetByIdWithOrderItemsAsync(int id)
+        {
+            Order? orderFromDb = await _orderRepository.GetByIdWithItemsAsync(id);
+            return orderFromDb;
+        }
         public async Task<Order> InsertAsync(Order entity)
         {
             return await _orderRepository.InsertReturnEntityAsync(entity);
@@ -57,7 +57,12 @@ namespace ZooOnlineStoreApi.Model.Orders
         {
             return await _orderRepository.SelectAllByUserIdAsync(userId);
         }
-
+        public async Task<List<Order>?> ListPaginationAsync(int page, int pageSize)
+        {
+            if (page < 1) page = 1;
+            int skip = (page - 1) * pageSize;
+            return await _orderRepository.GetAllWithPagination(skip, pageSize);
+        }
 
     }
 }

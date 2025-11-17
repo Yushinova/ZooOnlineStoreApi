@@ -11,7 +11,7 @@ namespace ZooOnlineStoreApi.Storage
         {
             _context = context;
         }
-        public async Task DeleteAsynk(User entity)
+        public async Task DeleteAsync(User entity)
         {
             _context.Remove(entity);
             await _context.SaveChangesAsync();
