@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ZooOnlineStoreApi.Model.Feedbacks;
 using ZooOnlineStoreApi.Model.Interfaces;
+using ZooOnlineStoreApi.Model.Products;
 
 namespace ZooOnlineStoreApi.Storage
 {
-    public class FeedbackRepository : IRepository<Feedback>
+    public class FeedbackRepository : IFeedbackRepository
     {
         private readonly ApplicationDbContext _context;
         public FeedbackRepository(ApplicationDbContext context)
@@ -31,6 +32,33 @@ namespace ZooOnlineStoreApi.Storage
         public async Task<List<Feedback>> SelectAllAsync()
         {
             return await _context.Feedbacks.ToListAsync();
+        }
+
+        public async Task<List<Feedback>?> SelectByProductIdAsync(int productId)
+        {
+            return await _context.Feedbacks.Where(f=>f.ProductId == productId).ToListAsync();
+        }
+
+        public async Task<List<Feedback>?> SelectByProductIdWithPaginationAsync(int productId, int page, int count)
+        {
+            return await _context.Feedbacks
+            .Include(f => f.User)
+            .Where(f => f.ProductId == productId)
+            .OrderByDescending(f => f.Id)
+            .Skip(page)
+            .Take(count)
+            .ToListAsync();
+        }
+
+        public async Task<List<Feedback>?> SelectByUserIdWithPaginationAsync(int userId, int page, int count)
+        {
+            return await _context.Feedbacks
+           .Include(f => f.User)
+           .Where(f => f.UserId == userId)
+           .OrderByDescending(f => f.Id)
+           .Skip(page)
+           .Take(count)
+           .ToListAsync();
         }
 
         public async Task UpdateAsync(Feedback entity)
