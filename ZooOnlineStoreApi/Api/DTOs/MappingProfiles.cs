@@ -2,7 +2,6 @@
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
 using ZooOnlineStoreApi.Model.Addresses;
-using ZooOnlineStoreApi.Model.Admins;
 using ZooOnlineStoreApi.Model.Categories;
 using ZooOnlineStoreApi.Model.Feedbacks;
 using ZooOnlineStoreApi.Model.OrderItems;
@@ -30,19 +29,15 @@ namespace ZooOnlineStoreApi.Api.DTOs
             CreateMap<ProductImage, ProductImageResponse>();
             CreateMap<ProductImageRequest, ProductImage>();
             CreateMap<Feedback, FeedbackResponse>();
-            CreateMap<FeedbackRequest, Feedback>();
             CreateMap<User, UserResponse>();
             CreateMap<User, UserAuthResponse>();
             CreateMap<User, UserOrderResponse>();
-            CreateMap<User, UserFeedbackResponse>();
             CreateMap<Address, AddressResponse>();
             CreateMap<AddressRequest, Address>();
             CreateMap<OrderItem, OrderItemResponse>();
             CreateMap<OrderItemRequest, OrderItem>();
             CreateMap<Order, OrderResponse>();
             CreateMap<OrderRequest, Order>();
-            CreateMap<AdminRequest, Admin>();
-            CreateMap<Admin, AdminResponse>();
         }
     }
  

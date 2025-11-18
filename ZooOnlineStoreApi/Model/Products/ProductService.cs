@@ -26,10 +26,6 @@ namespace ZooOnlineStoreApi.Model.Products
         {
             return await _products.SelectByIdWithAllInfo(id);
         }
-        public async Task<Product?> SelectByIdAsync(int id)
-        {
-            return await _products.GetByIdAsync(id);
-        }
         public async Task<List<Product>> ListAllAsync()
         {
             return await _products.SelectAllAsync();

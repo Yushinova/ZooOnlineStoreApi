@@ -386,8 +386,8 @@ namespace ZooOnlineStoreApi.Storage.Migrations
                     b.Property<DateTime>("RegisteredAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal>("TotalOrders")
-                        .HasColumnType("numeric");
+                    b.Property<double>("TotalOrders")
+                        .HasColumnType("double precision");
 
                     b.Property<Guid>("UUID")
                         .HasColumnType("uuid");

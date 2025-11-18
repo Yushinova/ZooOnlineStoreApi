@@ -15,7 +15,7 @@ namespace ZooOnlineStoreApi.Model.Users
         public int Discont { get; set; } = 0;
         public string? Email { get; set; }
         public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
-        public decimal TotalOrders { get; set; } = 0;
+        public double TotalOrders { get; set; } = 0;
         public HashSet<Address>? Addresses { get; set; }
         public HashSet<Feedback>? Feedbacks { get; set; }
         public HashSet<Order>? Orders { get; set; }

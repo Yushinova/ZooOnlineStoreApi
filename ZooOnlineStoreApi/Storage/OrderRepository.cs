@@ -62,7 +62,7 @@ namespace ZooOnlineStoreApi.Storage
 
         public async Task<List<Order>?> SelectAllByUserIdAsync(int userId)
         {
-            return await _context.Orders.Include(o=>o.OrderItems).Where(o=>o.UserId== userId).OrderByDescending(o=>o.Id).ToListAsync();
+            return await _context.Orders.Include(o=>o.OrderItems).Where(o=>o.UserId== userId).ToListAsync();
         }
 
         public async Task UpdateAsync(Order entity)
