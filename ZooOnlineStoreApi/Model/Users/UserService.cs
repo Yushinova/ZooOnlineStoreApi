@@ -81,6 +81,17 @@ namespace ZooOnlineStoreApi.Model.Users
             }
            return await _userRepository.GetByIdAsync(id);
         }
+        public async Task UpdateAsync(User user)
+        {
+            User? userFromDb = await _userRepository.GetByIdAsync(user.Id);
+            if (userFromDb == null)
+            {
+                throw new NotFoundException();
+            }
+            userFromDb.Discont = user.Discont;
+            userFromDb.TotalOrders = user.TotalOrders;
+            await _userRepository.UpdateAsync(userFromDb);
+        }
      
     }
 }

@@ -2,15 +2,13 @@
 using ZooOnlineStoreApi.Model.Products;
 using ZooOnlineStoreApi.Model.Users;
 
-namespace ZooOnlineStoreApi.Api.DTOs.Responses
+namespace ZooOnlineStoreApi.Api.DTOs.Requests
 {
-    public class FeedbackResponse
+    public class FeedbackRequest
     {
-        public int Id { get; set; }
         public string Content { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public int Rating { get; set; } = 0;
-        public UserFeedbackResponse? User { get; set; }
+        public int UserId { get; set; }
         public int ProductId { get; set; }
     }
 }
