@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using ZooOnlineStoreApi.Api.DTOs;
+using ZooOnlineStoreApi.Api.Jwt;
 using ZooOnlineStoreApi.Api.Middeleware;
 using ZooOnlineStoreApi.Crypto;
 using ZooOnlineStoreApi.Model.Addresses;
@@ -39,9 +41,19 @@ builder.Services.AddTransient<FeedbackService>();
 builder.Services.AddTransient<IAdminRepository, AdminRepository>();
 builder.Services.AddTransient<AdminService>();
 builder.Services.AddAutoMapper(options => options.AddProfile<MappingProfiles>());
+
+// сервисы аутентификации и авторизации
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(JwtService.ConfigureJwtOptions);
+builder.Services.AddAuthorization();
+builder.Services.AddTransient<JwtService>();
 var app = builder.Build();
 
 app.MapControllers();
 app.UseMiddleware<ErrorMiddleware>();
+// добавить middleware аутентификации и авторизации
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();

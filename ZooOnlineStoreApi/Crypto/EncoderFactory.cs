@@ -18,6 +18,8 @@ namespace ZooOnlineStoreApi.Crypto
                     return new MD5Encoder();
                 case "SHA256":
                     return new SHA256Encoder();
+                case "Bcrypt":
+                    return new BCryptEncoder();
                 default:
                     throw new InvalidOperationException($"unknown service: {serviceType}");
             }

@@ -69,5 +69,28 @@ namespace ZooOnlineStoreApi.Model.Admins
             }
             return adminFromDb;
         }
+
+        // GetUserAsync - получение данных о пользователе по ключу
+        // вход: api-ключ пользователя
+        // выход: объект с информацией о пользователе
+        // иключения: UserNotFoundException
+        public async Task<Admin> GetAdminAsync(string apiKey)
+        {
+            List<Admin> adminsFromDb = await _adminRepository.SelectAllAsync();
+            foreach (var item in adminsFromDb)
+            {
+                var generatedKey = generateApiKey(item);
+                if (_encoder.Verify(generatedKey, apiKey))
+                {
+                    return item;
+                }
+            }
+            throw new NotFoundException();
+        }
+
+        private string generateApiKey(Admin admin)
+        {
+            return _encoder.Encode($"{admin.Name} - {admin.Login} - {admin.RegisteredAt}");
+        }
     }
 }

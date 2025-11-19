@@ -8,21 +8,25 @@ namespace ZooOnlineStoreApi.Crypto
     {
         public string Encode(string data)
         {
-            // Создаем экземпляр MD5
             using (MD5 md5Hash = MD5.Create())
             {
-                // Преобразуем строку в массив байтов
+               //преобразуем строку в массив байтов
                 byte[] bytes = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(data));
-                // Создаем строку из массива байтов
+               //создаем строку из массива байтов
                 StringBuilder sBuilder = new StringBuilder();
-                // Преобразуем каждый байт в шестнадцатеричное представление
+                //каждый байт в шестнадцатеричное представление
                 for (int i = 0; i < bytes.Length; i++)
                 {
                     sBuilder.Append(bytes[i].ToString("x2"));
                 }
-                // Возвращаем полученную строку
                 return sBuilder.ToString();
             }
+        }
+
+        public bool Verify(string plainData, string hashedData)
+        {
+            string encodedPlainData = Encode(plainData);
+            return string.Equals(encodedPlainData, hashedData, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

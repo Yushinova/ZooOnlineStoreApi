@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
+using ZooOnlineStoreApi.Api.Jwt;
 using ZooOnlineStoreApi.Model.Admins;
 using ZooOnlineStoreApi.Model.Exeptions;
 using ZooOnlineStoreApi.Model.Interfaces;
@@ -38,6 +40,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
             this.mapper = mapper;
         }
         [HttpPost("product")]
+        [Authorize(Roles = JwtService.ADMIN_ROLE)]
         public async Task<ActionResult> InsertProductAsync([FromBody] ProductRequest request)
         {
             try
@@ -66,6 +69,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
 
         }
         [HttpPatch("product/{id:int}")]
+        [Authorize(Roles = JwtService.ADMIN_ROLE)]
         public async Task<IActionResult> UpdateByIdAsync(int id, [FromBody] ProductRequest request)
         {
             try
@@ -96,7 +100,8 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 return NotFound(error);
             }
         }
-        [HttpGet("order")]//с пагинацией все заказы
+        [HttpGet("orders")]//с пагинацией все заказы
+        [Authorize]
         public async Task<ActionResult> GetOrdersSorted([FromQuery] int page, [FromQuery] int pageSize)
         {
             List<Order>? ordersFromDb = await orderService.ListPaginationAsync(page, pageSize);
@@ -104,6 +109,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
             return Ok(mapper.Map<List<OrderResponse>>(ordersFromDb));
         }
         [HttpPatch("order/{id:int}")]
+        [Authorize]
         public async Task<IActionResult> UpdateByIdAsync([FromBody] OrderUpdateRequest request, int id)
         {
             try
@@ -140,7 +146,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 await adminService.InsertAsync(admin);
                 Admin? adminFromDb = await adminService.GetByLoginAsync(admin.Login);
                 AdminResponse response = mapper.Map<AdminResponse>(adminFromDb);
-                response.Token = encoder.Encode(generateApiKey(admin));
+                response.Token = encoder.Encode(generateApiKey(adminFromDb));
                 return Ok(response);
             }
             catch (DuplicationException ex)
@@ -201,7 +207,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         // генерация api-ключа для admin
         private string generateApiKey(Admin admin)
         {
-            return encoder.Encode($"{admin.Login} - {admin.Password}- {admin.RegisteredAt}");
+            return encoder.Encode($"{admin.Name} - {admin.Login} - {admin.RegisteredAt}");
         }
     }
 }

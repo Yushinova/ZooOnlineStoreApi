@@ -10,7 +10,13 @@ namespace ZooOnlineStoreApi.Crypto
         {
             var inputBytes = Encoding.UTF8.GetBytes(data);
             var inputHash = SHA256.HashData(inputBytes);
-            return Convert.ToHexString(inputHash);
+            return Convert.ToHexString(inputHash).ToLower(); ;
+        }
+
+        public bool Verify(string plainData, string hashedData)
+        {
+            string encodedPlainData = Encode(plainData);
+            return encodedPlainData == hashedData;
         }
     }
 }
