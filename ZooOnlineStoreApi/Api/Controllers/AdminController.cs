@@ -20,22 +20,12 @@ namespace ZooOnlineStoreApi.Api.Controllers
     public class AdminController : ControllerBase
     {
         private readonly AdminService adminService;
-        private readonly ProductService productService;
-        private readonly OrderService orderService;
-        private readonly PetTypeService petTypeService;
+    
         private readonly IEncoder encoder;
         private readonly IMapper mapper;
-        public AdminController(AdminService adminService,
-                            ProductService productService,
-                            OrderService orderService,
-                            PetTypeService petTypeService,
-                            IEncoder encoder,
-                            IMapper mapper)
+        public AdminController(AdminService adminService, IEncoder encoder, IMapper mapper)
         {
             this.adminService = adminService;
-            this.productService = productService;
-            this.orderService = orderService;
-            this.petTypeService = petTypeService;
             this.encoder = encoder;
             this.mapper = mapper;
         }
@@ -77,104 +67,6 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 return Ok(response);
             }
             catch (UnauthorizedAccessException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
-        }
-        //работа с продуктами (только роль админ)
-        [HttpPost("product")]
-        [Authorize(Roles = JwtService.ADMIN_ROLE)]
-        public async Task<ActionResult> InsertProductAsync([FromBody] ProductRequest request)
-        {
-            try
-            {
-                Product productInsert = mapper.Map<Product>(request);
-                if (request.PetTypeIds != null && request.PetTypeIds.Any())
-                {
-                    List<PetType> petTypesFromDb = await petTypeService.ListAllAsync();
-                    productInsert.PetTypes ??= new HashSet<PetType>();
-                    foreach (var item in petTypesFromDb)
-                    {
-                        if (request.PetTypeIds.Contains(item.Id))
-                        {
-                            productInsert.PetTypes.Add(item);
-                        }
-                    }
-                }
-                await productService.InsertAsync(productInsert);
-                return Ok(mapper.Map<ProductResponse>(productInsert));
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
-
-        }
-        [HttpPatch("product/{id:int}")]
-        [Authorize(Roles = JwtService.ADMIN_ROLE)]
-        public async Task<IActionResult> UpdateByIdAsync(int id, [FromBody] ProductRequest request)
-        {
-            try
-            {
-
-                Product petTypeUpdate = mapper.Map<Product>(request);
-                if (request.PetTypeIds != null && request.PetTypeIds.Any())
-                {
-                    List<PetType> petTypesFromDb = await petTypeService.ListAllAsync();
-                    petTypeUpdate.PetTypes = new HashSet<PetType>();
-                    foreach (var item in petTypesFromDb)
-                    {
-                        if (request.PetTypeIds.Contains(item.Id))
-                        {
-                            petTypeUpdate.PetTypes.Add(item);
-                        }
-                    }
-                }
-                petTypeUpdate.Id = id;
-                await productService.UpdateAsync(petTypeUpdate);
-                Product? productFromDb = await productService.SelectByIdWithAllInfoAsync(id);
-                return Ok(mapper.Map<ProductResponse>(productFromDb));
-
-            }
-            catch (NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
-        }
-        //работа с заказами все авторизованные админы
-        [HttpGet("orders")]//с пагинацией все заказы
-        [Authorize]
-        public async Task<ActionResult> GetOrdersSorted([FromQuery] int page, [FromQuery] int pageSize)
-        {
-            List<Order>? ordersFromDb = await orderService.ListPaginationAsync(page, pageSize);
-
-            return Ok(mapper.Map<List<OrderResponse>>(ordersFromDb));
-        }
-        [HttpPatch("order/{id:int}")]
-        [Authorize]
-        public async Task<IActionResult> UpdateByIdAsync([FromBody] OrderUpdateRequest request, int id)
-        {
-            try
-            {
-                Order? orderFromDb = await orderService.GetByIdAsync(id);
-                if (orderFromDb != null)
-                {
-                    orderFromDb.ShippingCost = request.ShippingCost;
-                    orderFromDb.ShippingAddress = request.ShippingAddress;
-                    orderFromDb.Status = request.Status;
-                    await orderService.UndateAsync(orderFromDb);
-                }
-                return Ok(mapper.Map<OrderResponse>(orderFromDb));
-            }
-            catch (NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
-            catch (Exception ex)
             {
                 ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
                 return BadRequest(error);

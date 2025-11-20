@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
@@ -20,7 +21,9 @@ namespace ZooOnlineStoreApi.Api.Controllers
             this.productService = productService;
             this.mapper = mapper;
         }
+
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AddNewFeedbackAsync([FromBody] FeedbackRequest request)
         {
             try
@@ -45,6 +48,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
             }
 
         }
+
         [HttpGet]
         public async Task<IActionResult> GetAllFeedbacksAsync()
         {
