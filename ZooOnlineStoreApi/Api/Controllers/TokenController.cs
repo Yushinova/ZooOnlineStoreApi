@@ -3,7 +3,7 @@ using ZooOnlineStoreApi.Api.Jwt;
 
 namespace ZooOnlineStoreApi.Api.Controllers
 {
-    [Route("api/admin/auth")]
+    [Route("api/auth")]
     [ApiController]
     public class TokenController: ControllerBase
     {
@@ -14,13 +14,13 @@ namespace ZooOnlineStoreApi.Api.Controllers
             _jwt = jwt;
         }
 
-        [HttpPost]
+        [HttpPost("admin")]
         //передаем ключ в header!
-        public async Task<IActionResult> AuthAsync([FromHeader(Name="X-Api-Key")] string apiKey)
+        public async Task<IActionResult> AuthAdminAsync([FromHeader(Name="X-Api-Key")] string apiKey)
         {
             try
             {
-                string token = await _jwt.GenerateTokenAsync(apiKey);
+                string token = await _jwt.GenerateAdminTokenAsync(apiKey);
                 // 200
                 return Ok(token);
             }
@@ -31,5 +31,23 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 return Unauthorized(error);
             }
         }
+        [HttpPost("user")]
+        //передаем ключ в header!
+        public async Task<IActionResult> AuthUserAsync([FromHeader(Name = "X-Api-Key")] string apiKey)
+        {
+            try
+            {
+                string token = await _jwt.GenerateUserTokenAsync(apiKey);
+                // 200
+                return Ok(token);
+            }
+            catch (InvalidApiKeyException ex)
+            {
+                // 401
+                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
+                return Unauthorized(error);
+            }
+        }
+
     }
 }

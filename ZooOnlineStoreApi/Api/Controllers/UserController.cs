@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
@@ -88,6 +89,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
             }
         }
         [HttpGet]
+       // [Authorize]
         public async Task<IActionResult> ListAllAsync()
         {
             List<User> usersFromDb = await userService.ListAllAsync();
@@ -108,6 +110,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
             }
         }
         [HttpDelete("{id:int}")]
+        [Authorize]
         public async Task<IActionResult> DeleteByIdAsync(int id)
         {
             try
@@ -123,6 +126,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
         ///Ограничение доступа юзера
         [HttpPost("order")]//добавление нового заказа юзером
+        [Authorize]
         public async Task<IActionResult> AddNewOrderAsync([FromBody] OrderRequest request)
         {
             try
@@ -156,7 +160,8 @@ namespace ZooOnlineStoreApi.Api.Controllers
 
         }
 
-        [HttpGet("orders/{userId:int}")]//получение всех заказов юзером
+        [HttpGet("order/{userId:int}")]//получение всех заказов юзером
+        [Authorize]
         public async Task<IActionResult> ListAllByUserId(int userId)
         {
             try

@@ -11,6 +11,8 @@ namespace ZooOnlineStoreApi.Api.Jwt
 {
     public class JwtService
     {
+        public const string ADMIN_ROLE = "admin";
+        public const string USER_ROLE = "user";
         //параметры jwt-схемы и токена
         private const string JWT_ISSUER = "ZooOnlineStoreApi_issuer";
         private const string JWT_AUDIENCE = "ZooOnlineStoreApi_audience";
@@ -36,59 +38,80 @@ namespace ZooOnlineStoreApi.Api.Jwt
             };
         }
 
-        // параметры авторизации
-        public const string ADMIN_ROLE = "admin";
-
         private readonly AdminService adminService;
+        private readonly UserService userService;
 
-        public JwtService(AdminService adminService)
+        public JwtService(AdminService adminService, UserService userService)
         {
             this.adminService = adminService;
+            this.userService = userService;
         }
 
         // GenerateTokenAsync - генерация jwt-токена на основе api-ключа пользователля
         // вход: api-ключ пользователя
         // выход: строка jwt-токена
         // исключения: InvalidApiKeyException
-        public async Task<string> GenerateTokenAsync(string apiKey)
+        public async Task<string> GenerateAdminTokenAsync(string apiKey)
         {
             try
             {
-                // 1. получить пользователя по api-ключу
                 Admin? admin = await adminService.GetAdminAsync(apiKey);
-                // 2. подготовить данные пользователя (claims)
                 List<Claim> claims = new List<Claim>()
+        {
+            new Claim(ClaimTypes.Name, admin.Name),
+            new Claim(ClaimTypes.NameIdentifier, admin.Login),
+            new Claim("UserType", "Admin") // Добавляем тип пользователя
+        };
+
+                if (admin.Role == "admin")
                 {
-                    new Claim(ClaimTypes.Name, admin.Name),
-                    new Claim(ClaimTypes.NameIdentifier, admin.Login),
-                };
-                if (admin.Role=="admin")
-                {
-                    // если пользователь VIP, то добавим ему роль
                     claims.Add(new Claim(ClaimTypes.Role, ADMIN_ROLE));
                 }
-                // 3. подготовить подпись токена
-                SigningCredentials signing = new SigningCredentials(
-                    GetIssuerSigningKey(),
-                    SecurityAlgorithms.HmacSha256
-                );
-                // 4. собрать токен
-                JwtSecurityToken jwt = new JwtSecurityToken(
-                    issuer: JWT_ISSUER,
-                    audience: JWT_AUDIENCE,
-                    claims: claims,
-                    signingCredentials: signing,
-                    expires: DateTime.UtcNow.AddMinutes(JWT_LIFE_TIME_MINUTES)
-                );
-                // 5. вернуть токен в виде строки
-                string jwtStr = new JwtSecurityTokenHandler().WriteToken(jwt);
-                return jwtStr;
+
+                return GenerateToken(claims);
             }
             catch (NotFoundException)
             {
-                // пользователя нет -> апи-ключ не правильный
                 throw new InvalidApiKeyException();
             }
+        }
+
+        public async Task<string> GenerateUserTokenAsync(string apiKey)
+        {
+            try
+            {
+                User? user = await userService.GetUserAsync(apiKey);
+                List<Claim> claims = new List<Claim>()
+        {
+            new Claim(ClaimTypes.Name, user.Name),
+            new Claim(ClaimTypes.NameIdentifier, user.Phone),
+            new Claim(ClaimTypes.Role, USER_ROLE),
+            new Claim("UserType", "User") // Добавляем тип пользователя
+        };
+
+                return GenerateToken(claims);
+            }
+            catch (NotFoundException)
+            {
+                throw new InvalidApiKeyException();
+            }
+        }
+        private string GenerateToken(List<Claim> claims)
+        {
+            SigningCredentials signing = new SigningCredentials(
+                GetIssuerSigningKey(),
+                SecurityAlgorithms.HmacSha256
+            );
+
+            JwtSecurityToken jwt = new JwtSecurityToken(
+                issuer: JWT_ISSUER,
+                audience: JWT_AUDIENCE,
+                claims: claims,
+                signingCredentials: signing,
+                expires: DateTime.UtcNow.AddMinutes(JWT_LIFE_TIME_MINUTES)
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
         private const string ISSUER_SIGNING_KEY_SEED = "seedseedseedseedseedseedseedseed";
 

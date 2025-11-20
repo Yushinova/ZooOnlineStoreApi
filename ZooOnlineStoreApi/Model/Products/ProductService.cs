@@ -1,4 +1,6 @@
-﻿using System.Xml.Linq;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Xml.Linq;
+using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Model.Exeptions;
 using ZooOnlineStoreApi.Model.Interfaces;
 using ZooOnlineStoreApi.Model.PetTypes;
@@ -22,6 +24,12 @@ namespace ZooOnlineStoreApi.Model.Products
         {
             return _products.InsertAsync(product);
         }
+        public async Task<List<Product>?> SuperPagination(ProductQueryParameters parameters)
+        {
+            if (parameters.Page < 1) parameters.Page = 1;
+            if (parameters.PageSize < 1) parameters.PageSize = 10;
+           return await _products.SelectAllWithFilters(parameters);
+        }
         public async Task<Product?> SelectByIdWithAllInfoAsync(int id)
         {
             return await _products.SelectByIdWithAllInfo(id);
@@ -34,18 +42,6 @@ namespace ZooOnlineStoreApi.Model.Products
         {
             return await _products.SelectAllAsync();
         }
-        public async Task<List<Product>?> ListAllByPetTypeIdAsync(int petTypeId)
-        {
-            return await _products.SelectAllByPetTypeIdAsync(petTypeId);
-        }
-        public async Task<List<Product>> ListAllByCategoryIdAsync(int categoryId)
-        {
-            return await _products.SelectAllByCategoryIdAsync(categoryId);
-        }
-        public async Task<List<Product>> ListAllByCategoryAndPetTypeIdAsync(int categoryId, int petTypeId)
-        {
-            return await _products.SelectAllByCategoryAndPetTypeIdAsync(categoryId, petTypeId);
-        }
         public async Task DeleteQuantityByIdAsync(int id, int quantity)
         {
             Product? productFromDb = await _products.GetByIdAsync(id);
@@ -57,7 +53,7 @@ namespace ZooOnlineStoreApi.Model.Products
                 }
                 await _products.UpdateAsync(productFromDb);
             }
-            
+
         }
         public async Task UpdateAsync(Product product)
         {
@@ -76,7 +72,8 @@ namespace ZooOnlineStoreApi.Model.Products
             productFromDb.isPromotion = product.isPromotion;
             productFromDb.isActive = product.isActive;
             productFromDb.CategoryId = product.CategoryId;
-            if (productFromDb.PetTypes!=null) {
+            if (productFromDb.PetTypes != null)
+            {
                 productFromDb.PetTypes.Clear();
             }
             productFromDb.PetTypes = product.PetTypes;

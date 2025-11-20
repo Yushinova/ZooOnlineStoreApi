@@ -39,6 +39,50 @@ namespace ZooOnlineStoreApi.Api.Controllers
             this.encoder = encoder;
             this.mapper = mapper;
         }
+        //регистрация авторизация
+        [HttpPost("register")]
+        public async Task<IActionResult> RegisterAsync([FromBody] AdminRequest request)
+        {
+            try
+            {
+                Admin admin = mapper.Map<Admin>(request);
+                admin.Password = encoder.Encode(request.Password);
+                admin.RegisteredAt = DateTime.UtcNow;
+                await adminService.InsertAsync(admin);
+                Admin? adminFromDb = await adminService.GetByLoginAsync(admin.Login);
+                AdminResponse response = mapper.Map<AdminResponse>(adminFromDb);
+                response.Token = encoder.Encode(generateApiKey(adminFromDb));
+                return Ok(response);
+            }
+            catch (DuplicationException ex)
+            {
+                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
+                return Conflict(error);
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
+                return NotFound(error);
+            }
+
+        }
+        [HttpPost("login")]
+        public async Task<ActionResult> LoginAsync([FromBody] AdminLoginRequest request)
+        {
+            try
+            {
+                Admin adminFromDb = await adminService.AuthenticateAsync(request.Login, request.Password);
+                AdminResponse response = mapper.Map<AdminResponse>(adminFromDb);
+                response.Token = encoder.Encode(generateApiKey(adminFromDb));
+                return Ok(response);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
+                return BadRequest(error);
+            }
+        }
+        //работа с продуктами (только роль админ)
         [HttpPost("product")]
         [Authorize(Roles = JwtService.ADMIN_ROLE)]
         public async Task<ActionResult> InsertProductAsync([FromBody] ProductRequest request)
@@ -100,6 +144,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 return NotFound(error);
             }
         }
+        //работа с заказами все авторизованные админы
         [HttpGet("orders")]//с пагинацией все заказы
         [Authorize]
         public async Task<ActionResult> GetOrdersSorted([FromQuery] int page, [FromQuery] int pageSize)
@@ -135,49 +180,9 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 return BadRequest(error);
             }
         }
-        [HttpPost("register")]
-        public async Task<IActionResult> RegisterAsync([FromBody] AdminRequest request)
-        {
-            try
-            {
-                Admin admin = mapper.Map<Admin>(request);
-                admin.Password = encoder.Encode(request.Password);
-                admin.RegisteredAt = DateTime.UtcNow;
-                await adminService.InsertAsync(admin);
-                Admin? adminFromDb = await adminService.GetByLoginAsync(admin.Login);
-                AdminResponse response = mapper.Map<AdminResponse>(adminFromDb);
-                response.Token = encoder.Encode(generateApiKey(adminFromDb));
-                return Ok(response);
-            }
-            catch (DuplicationException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return Conflict(error);
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
+       
 
-        }
-        [HttpPost("login")]
-        public async Task<ActionResult> LoginAsync([FromBody] AdminLoginRequest request)
-        {
-            try
-            {
-                Admin adminFromDb = await adminService.AuthenticateAsync(request.Login, request.Password);
-                AdminResponse response = mapper.Map<AdminResponse>(adminFromDb);
-                response.Token = encoder.Encode(generateApiKey(adminFromDb));
-                return Ok(response);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
-        }
-      
+      //мой служебный метод пока что
         [HttpPatch]
         public async Task<IActionResult> UpdateAsync([FromBody] AdminUpdateRequest request)
         {

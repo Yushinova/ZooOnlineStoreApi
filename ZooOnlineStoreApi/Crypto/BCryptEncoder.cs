@@ -2,7 +2,7 @@
 
 namespace ZooOnlineStoreApi.Crypto
 {
-    public class BCryptEncoder: IEncoder
+    public class BCryptEncoder : IEncoder
     {
         public string Encode(string data)
         {
@@ -13,7 +13,9 @@ namespace ZooOnlineStoreApi.Crypto
         }
         public bool Verify(string plainData, string hashedData)
         {
+
             return BCrypt.Net.BCrypt.Verify(plainData, hashedData);
+
         }
     }
 }

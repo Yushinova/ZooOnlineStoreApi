@@ -63,7 +63,7 @@ namespace ZooOnlineStoreApi.Model.Admins
             {
                 throw new UnauthorizedAccessException("admin not found");
             }
-            if (_encoder.Encode(password) != adminFromDb.Password)
+            if (!_encoder.Verify(password, adminFromDb.Password))
             {
                 throw new UnauthorizedAccessException("error password");
             }
@@ -79,7 +79,7 @@ namespace ZooOnlineStoreApi.Model.Admins
             List<Admin> adminsFromDb = await _adminRepository.SelectAllAsync();
             foreach (var item in adminsFromDb)
             {
-                var generatedKey = generateApiKey(item);
+                string generatedKey = generateApiKey(item);
                 if (_encoder.Verify(generatedKey, apiKey))
                 {
                     return item;

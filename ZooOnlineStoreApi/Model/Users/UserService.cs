@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity.Data;
 using System.ComponentModel.DataAnnotations;
+using System.Text;
 using System.Text.RegularExpressions;
+using ZooOnlineStoreApi.Model.Admins;
 using ZooOnlineStoreApi.Model.Exeptions;
 using ZooOnlineStoreApi.Model.Interfaces;
+using ZooOnlineStoreApi.Storage;
 using ValidationException = ZooOnlineStoreApi.Model.Exeptions.ValidationException;
 
 namespace ZooOnlineStoreApi.Model.Users
@@ -22,7 +25,8 @@ namespace ZooOnlineStoreApi.Model.Users
         public async Task<User?> RegisterAsync(User user)//первая регистрация
         {
             User? userFromDb = await _userRepository.GetByPhoneAsync(user.Phone);
-            if (userFromDb == null) {
+            if (userFromDb == null)
+            {
 
                 // валидация строк
                 if (!Regex.IsMatch(user.Phone, phonePattern))
@@ -34,7 +38,7 @@ namespace ZooOnlineStoreApi.Model.Users
                     throw new ValidationException("email", "email is invalid", user.Email);
                 }
                 await _userRepository.InsertAsync(user);
-            
+
                 return await _userRepository.GetByPhoneAsync(user.Phone);
             }
             else
@@ -49,14 +53,16 @@ namespace ZooOnlineStoreApi.Model.Users
                 throw new ValidationException("phone", "phone is inavalid", login);
             }
             User? userFromDb = await _userRepository.GetByPhoneAsync(login);
-            if (userFromDb == null) {
+            if (userFromDb == null)
+            {
                 throw new UnauthorizedAccessException("user not found");
             }
-            if (_encoder.Encode(password) != userFromDb.Password)
+            if (!_encoder.Verify(password, userFromDb.Password))
             {
                 throw new UnauthorizedAccessException("error password");
             }
             return userFromDb;
+
         }
         public async Task<List<User>> ListAllAsync()
         {
@@ -79,7 +85,7 @@ namespace ZooOnlineStoreApi.Model.Users
             {
                 throw new NotFoundException();
             }
-           return await _userRepository.GetByIdAsync(id);
+            return await _userRepository.GetByIdAsync(id);
         }
         public async Task UpdateAsync(User user)
         {
@@ -92,6 +98,28 @@ namespace ZooOnlineStoreApi.Model.Users
             userFromDb.TotalOrders = user.TotalOrders;
             await _userRepository.UpdateAsync(userFromDb);
         }
-     
+        // GetUserAsync - получение данных о пользователе по ключу
+        // вход: api-ключ пользователя
+        // выход: объект с информацией о пользователе
+        // иключения: UserNotFoundException
+        public async Task<User> GetUserAsync(string apiKey)
+        {
+            List<User> usersFromDb = await _userRepository.SelectAllAsync();
+            foreach (var item in usersFromDb)
+            {
+                var generatedKey = generateApiKey(item);
+                if (_encoder.Verify(generatedKey, apiKey))
+                {
+                    return item;
+                }
+            }
+            throw new NotFoundException();
+        }
+        // генерация api-ключа для пользователя
+        private string generateApiKey(User user)
+        {
+            return _encoder.Encode($"{user.UUID} - {user.Phone} - {user.Email} - {user.RegisteredAt}");
+        }
+
     }
 }

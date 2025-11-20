@@ -19,36 +19,17 @@ namespace ZooOnlineStoreApi.Api.Controllers
             this.productService = productService;
             this.mapper = mapper;
         }
-        
         [HttpGet]
+        public async Task<IActionResult> GetAllWithFilterAndPagination([FromQuery] ProductQueryParameters parameters)
+        {
+            List<Product>? productsFromDb  = await productService.SuperPagination(parameters);
+            return Ok(mapper.Map<List<ProductResponse>>(productsFromDb));
+        }
+        [HttpGet("all")]//test
         public async Task<IActionResult> GetAllAsync()
         {
             List<Product> productFromDb = await productService.ListAllAsync();
             return Ok(mapper.Map<List<ProductResponse>>(productFromDb));
-        }
-        [HttpGet("category/{categoryId}")]
-        public async Task<IActionResult> GetAllByCategoryIdAsync(int categoryId)
-        {
-
-            List<Product> productsFromDb = await productService.ListAllByCategoryIdAsync(categoryId);
-
-            return Ok(mapper.Map<List<ProductResponse>>(productsFromDb));
-        }
-        [HttpGet("pettype/{petTypeId}")]
-        public async Task<IActionResult> GetAllByPetTypeIdAsync(int petTypeId)
-        {
-
-            List<Product>? productsFromDb = await productService.ListAllByPetTypeIdAsync(petTypeId);
-
-            return Ok(mapper.Map<List<ProductResponse>>(productsFromDb));
-        }
-        [HttpGet("category/{categoryId}/pettype/{petTypeId}")]
-        public async Task<IActionResult> GetAllByCategoryAndPetTypeIdAsync(int categoryId, int petTypeId)
-        {
-
-            List<Product> productsFromDb = await productService.ListAllByCategoryAndPetTypeIdAsync(categoryId, petTypeId);
-
-            return Ok(mapper.Map<List<ProductResponse>>(productsFromDb));
         }
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetByIdWithAllInfoAsync(int id)
