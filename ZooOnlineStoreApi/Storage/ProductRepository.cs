@@ -98,6 +98,12 @@ namespace ZooOnlineStoreApi.Storage
             await _context.SaveChangesAsync();
         }
 
+        public async Task<Product> InsertAndReturnAsync(Product entity)
+        {
+            await _context.AddAsync(entity);
+            await _context.SaveChangesAsync();
+            return entity;
 
+        }
     }
 }

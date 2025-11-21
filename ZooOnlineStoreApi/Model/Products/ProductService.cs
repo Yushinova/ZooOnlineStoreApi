@@ -20,9 +20,9 @@ namespace ZooOnlineStoreApi.Model.Products
             _images = images;
             _petTypes = petTypes;
         }
-        public Task InsertAsync(Product product)
+        public async Task<Product> InsertAsync(Product product)
         {
-            return _products.InsertAsync(product);
+            return await _products.InsertAndReturnAsync(product);
         }
         public async Task<List<Product>?> SuperPagination(ProductQueryParameters parameters)
         {
@@ -105,6 +105,15 @@ namespace ZooOnlineStoreApi.Model.Products
             }
             productFromDb.PetTypes.Remove(petType);
             await _products.UpdateAsync(productFromDb);
+        }
+        public async Task DeleteAsync(Product product)
+        {
+            Product? productFromDb = await _products.GetByIdAsync(product.Id);
+            if (productFromDb==null)
+            {
+                throw new NotFoundException();
+            }
+            await _products.DeleteAsync(productFromDb);
         }
 
     }

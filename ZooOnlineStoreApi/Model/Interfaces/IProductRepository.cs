@@ -9,5 +9,6 @@ namespace ZooOnlineStoreApi.Model.Interfaces
         Task<Product?> SelectByIdWithAllInfo(int id);
         IQueryable<Product> SelectAllWithImagesAndPetTypesAsync();
         Task<List<Product>?> SelectAllWithFilters(ProductQueryParameters parameters);
+        Task<Product> InsertAndReturnAsync(Product entity);
     }
 }

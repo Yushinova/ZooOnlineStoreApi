@@ -66,8 +66,9 @@ namespace ZooOnlineStoreApi.Api.Controllers
                         }
                     }
                 }
-                await productService.InsertAsync(productInsert);
-                return Ok(mapper.Map<ProductResponse>(productInsert));
+              Product productFromDb = await productService.InsertAsync(productInsert);
+                //нужновернуть с id!
+                return Ok(mapper.Map<ProductResponse>(productFromDb));
             }
             catch (Exception ex)
             {
@@ -109,6 +110,26 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 return NotFound(error);
             }
         }
-
+        [HttpDelete("admin/{id:int}")]
+        [Authorize(Roles = JwtService.ADMIN_ROLE)]
+        public async Task<IActionResult> DeleteByIdAsync(int id)
+        {
+            try
+            {
+                Product? productFromDb = await productService.SelectByIdAsync(id);
+                await productService.DeleteAsync(productFromDb);
+                return Ok();
+            }
+            catch(NotFoundException ex)
+            {
+                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
+                return NotFound(error);
+            }
+            catch(Exception ex)
+            {
+                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
+                return BadRequest(error);
+            }
+        }
     }
 }
