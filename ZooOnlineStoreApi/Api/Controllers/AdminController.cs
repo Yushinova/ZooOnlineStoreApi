@@ -41,7 +41,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 await adminService.InsertAsync(admin);
                 Admin? adminFromDb = await adminService.GetByLoginAsync(admin.Login);
                 AdminResponse response = mapper.Map<AdminResponse>(adminFromDb);
-                response.Token = encoder.Encode(generateApiKey(adminFromDb));
+                response.ApiKey = encoder.Encode(generateApiKey(adminFromDb));
                 return Ok(response);
             }
             catch (DuplicationException ex)
@@ -63,7 +63,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
             {
                 Admin adminFromDb = await adminService.AuthenticateAsync(request.Login, request.Password);
                 AdminResponse response = mapper.Map<AdminResponse>(adminFromDb);
-                response.Token = encoder.Encode(generateApiKey(adminFromDb));
+                response.ApiKey = encoder.Encode(generateApiKey(adminFromDb));
                 return Ok(response);
             }
             catch (UnauthorizedAccessException ex)
