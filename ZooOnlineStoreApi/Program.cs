@@ -15,8 +15,19 @@ using ZooOnlineStoreApi.Model.ProductImages;
 using ZooOnlineStoreApi.Model.Products;
 using ZooOnlineStoreApi.Model.Users;
 using ZooOnlineStoreApi.Storage;
-var builder = WebApplication.CreateBuilder(args);
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000", "https://localhost:3000")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 builder.Services.AddControllers();
 builder.Services.AddTransient(opts => EncoderFactory.CreateEncoderFactory());
 builder.Services.AddDbContext<ApplicationDbContext>();
@@ -49,7 +60,7 @@ builder.Services
 builder.Services.AddAuthorization();
 builder.Services.AddTransient<JwtService>();
 var app = builder.Build();
-
+app.UseCors(MyAllowSpecificOrigins);
 app.MapControllers();
 app.UseMiddleware<ErrorMiddleware>();
 // добавить middleware аутентификации и авторизации

@@ -11,9 +11,9 @@ namespace ZooOnlineStoreApi.Api.DTOs.Responses
         public decimal ShippingCost { get; set; } = 0;
         public decimal Amount { get; set; } = 0;
         public string Status { get; set; } = string.Empty;//Kart, Paid, Processing, Shipped, Delivered, Deleted
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
         public string ShippingAddress { get; set; } = string.Empty;
-        public UserOrderResponse? User { get; set; }
-        public List<OrderItemResponse>? OrderItems { get; set; }
+        public UserOrderResponse User { get; set; }
+        public List<OrderItemResponse> OrderItems { get; set; }
     }
 }

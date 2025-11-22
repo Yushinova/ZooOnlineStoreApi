@@ -106,9 +106,9 @@ namespace ZooOnlineStoreApi.Model.Products
             productFromDb.PetTypes.Remove(petType);
             await _products.UpdateAsync(productFromDb);
         }
-        public async Task DeleteAsync(Product product)
+        public async Task DeleteAsync(int id)
         {
-            Product? productFromDb = await _products.GetByIdAsync(product.Id);
+            Product? productFromDb = await _products.GetByIdAsync(id);
             if (productFromDb==null)
             {
                 throw new NotFoundException();

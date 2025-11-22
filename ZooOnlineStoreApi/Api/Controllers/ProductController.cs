@@ -24,19 +24,19 @@ namespace ZooOnlineStoreApi.Api.Controllers
             this.mapper = mapper;
         }
 
-        [HttpGet("sorted")]
+        [HttpGet]
         public async Task<IActionResult> GetAllWithFilterAndPagination([FromQuery] ProductQueryParameters parameters)
         {
             List<Product>? productsFromDb = await productService.SuperPagination(parameters);
             return Ok(mapper.Map<List<ProductResponse>>(productsFromDb));
         }
 
-        [HttpGet]//test
-        public async Task<IActionResult> GetAllAsync()
-        {
-            List<Product> productFromDb = await productService.ListAllAsync();
-            return Ok(mapper.Map<List<ProductResponse>>(productFromDb));
-        }
+        //[HttpGet]//test
+        //public async Task<IActionResult> GetAllAsync()
+        //{
+        //    List<Product> productFromDb = await productService.ListAllAsync();
+        //    return Ok(mapper.Map<List<ProductResponse>>(productFromDb));
+        //}
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetByIdWithAllInfoAsync(int id)
@@ -116,8 +116,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         {
             try
             {
-                Product? productFromDb = await productService.SelectByIdAsync(id);
-                await productService.DeleteAsync(productFromDb);
+                await productService.DeleteAsync(id);
                 return Ok();
             }
             catch(NotFoundException ex)
