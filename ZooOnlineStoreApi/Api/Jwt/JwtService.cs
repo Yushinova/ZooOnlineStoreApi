@@ -16,7 +16,7 @@ namespace ZooOnlineStoreApi.Api.Jwt
         //параметры jwt-схемы и токена
         private const string JWT_ISSUER = "ZooOnlineStoreApi_issuer";
         private const string JWT_AUDIENCE = "ZooOnlineStoreApi_audience";
-        private const int JWT_LIFE_TIME_MINUTES = 30;
+        private const int JWT_LIFE_TIME_MINUTES = 1440; // 24 часа
 
         // ConfigureJwtOptions - метод конфигурации jwt-схемы аутентификации
         public static void ConfigureJwtOptions(JwtBearerOptions options)

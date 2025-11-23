@@ -29,6 +29,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
             this.encoder = encoder;
             this.mapper = mapper;
         }
+      
         //регистрация авторизация
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync([FromBody] AdminRequest request)
@@ -42,6 +43,16 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 Admin? adminFromDb = await adminService.GetByLoginAsync(admin.Login);
                 AdminResponse response = mapper.Map<AdminResponse>(adminFromDb);
                 response.ApiKey = encoder.Encode(generateApiKey(adminFromDb));
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,     // Защита от XSS
+                    Secure = false,       // Только HTTPS (в проде)
+                    SameSite = SameSiteMode.Strict, // Защита от CSRF
+                    Expires = DateTime.UtcNow.AddDays(30), // Долгий срок
+                    Path = "/",          // Доступ на всех страницах
+                                         // Domain = "example.com" // Если нужно на поддоменах
+                };
+                HttpContext.Response.Cookies.Append("adminApiKey", response.ApiKey, cookieOptions);
                 return Ok(response);
             }
             catch (DuplicationException ex)
@@ -56,6 +67,23 @@ namespace ZooOnlineStoreApi.Api.Controllers
             }
 
         }
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            try
+            {
+                // Удаляем оба cookies
+                HttpContext.Response.Cookies.Delete("adminApiKey");
+                HttpContext.Response.Cookies.Delete("adminToken");
+
+                return Ok(new { message = "Logged out successfully" });
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
+                return BadRequest(error);
+            }
+        }
         [HttpPost("login")]
         public async Task<ActionResult> LoginAsync([FromBody] AdminLoginRequest request)
         {
@@ -64,6 +92,17 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 Admin adminFromDb = await adminService.AuthenticateAsync(request.Login, request.Password);
                 AdminResponse response = mapper.Map<AdminResponse>(adminFromDb);
                 response.ApiKey = encoder.Encode(generateApiKey(adminFromDb));
+                //var cookieOptions = new CookieOptions
+                //{
+                //    HttpOnly = true,     // Защита от XSS
+                //    Secure = false,       // Только HTTPS (в проде)
+                //    SameSite = SameSiteMode.Strict, // Защита от CSRF
+                //    Expires = DateTime.UtcNow.AddDays(30), // Долгий срок
+                //    Path = "/",          // Доступ на всех страницах
+                //                         // Domain = "example.com" // Если нужно на поддоменах
+                //};
+                //HttpContext.Response.Cookies.Append("adminApiKey", response.ApiKey, cookieOptions);
+                //HttpContext.Response.Cookies.Append("new", "ddd", cookieOptions);
                 return Ok(response);
             }
             catch (UnauthorizedAccessException ex)

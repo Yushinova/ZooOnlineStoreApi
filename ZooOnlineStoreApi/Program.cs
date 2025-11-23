@@ -25,7 +25,8 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins("http://localhost:3000", "https://localhost:3000")
                   .AllowAnyHeader()
-                  .AllowAnyMethod();
+                  .AllowAnyMethod()
+                  .AllowCredentials();
         });
 });
 builder.Services.AddControllers();
@@ -51,6 +52,7 @@ builder.Services.AddTransient<IFeedbackRepository, FeedbackRepository>();
 builder.Services.AddTransient<FeedbackService>();
 builder.Services.AddTransient<IAdminRepository, AdminRepository>();
 builder.Services.AddTransient<AdminService>();
+builder.Services.AddTransient<JwtService>();
 builder.Services.AddAutoMapper(options => options.AddProfile<MappingProfiles>());
 
 // сервисы аутентификации и авторизации
@@ -60,6 +62,7 @@ builder.Services
 builder.Services.AddAuthorization();
 builder.Services.AddTransient<JwtService>();
 var app = builder.Build();
+app.UseRouting();
 app.UseCors(MyAllowSpecificOrigins);
 app.MapControllers();
 app.UseMiddleware<ErrorMiddleware>();

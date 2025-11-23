@@ -31,12 +31,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
             return Ok(mapper.Map<List<ProductResponse>>(productsFromDb));
         }
 
-        //[HttpGet]//test
-        //public async Task<IActionResult> GetAllAsync()
-        //{
-        //    List<Product> productFromDb = await productService.ListAllAsync();
-        //    return Ok(mapper.Map<List<ProductResponse>>(productFromDb));
-        //}
+       
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetByIdWithAllInfoAsync(int id)
