@@ -55,7 +55,7 @@ namespace ZooOnlineStoreApi.Model.Admins
             }
             await _adminRepository.DeleteAsync(admin);
         }
-        public async Task<Admin> AuthenticateAsync(string login, string password)
+        public async Task<string> AuthenticateAsync(string login, string password)
         {
 
             Admin? adminFromDb = await _adminRepository.GetByLoginAsync(login);
@@ -67,7 +67,7 @@ namespace ZooOnlineStoreApi.Model.Admins
             {
                 throw new UnauthorizedAccessException("error password");
             }
-            return adminFromDb;
+            return generateApiKey(adminFromDb);
         }
 
         // GetUserAsync - получение данных о пользователе по ключу
@@ -80,7 +80,7 @@ namespace ZooOnlineStoreApi.Model.Admins
             foreach (var item in adminsFromDb)
             {
                 string generatedKey = generateApiKey(item);
-                if (_encoder.Verify(generatedKey, apiKey))
+                if (generatedKey == apiKey)
                 {
                     return item;
                 }

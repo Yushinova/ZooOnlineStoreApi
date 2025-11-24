@@ -59,6 +59,8 @@ builder.Services.AddAutoMapper(options => options.AddProfile<MappingProfiles>())
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(JwtService.ConfigureJwtOptions);
+
+
 builder.Services.AddAuthorization();
 builder.Services.AddTransient<JwtService>();
 var app = builder.Build();

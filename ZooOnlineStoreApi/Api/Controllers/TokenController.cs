@@ -17,11 +17,11 @@ namespace ZooOnlineStoreApi.Api.Controllers
        
         [HttpPost("admin")]
         //передаем ключ в header!
-        public async Task<IActionResult> AuthAdminAsync([FromBody] string apiKey)
+        public async Task<IActionResult> AuthAdminAsync(ApiKeyMessage apiKey)
         {
             try
             {
-                string token = await _jwt.GenerateAdminTokenAsync(apiKey);
+                string token = await _jwt.GenerateAdminTokenAsync(apiKey.ApiKey);
                 // Console.WriteLine(token);
                 var cookieOptions = new CookieOptions
                 {
@@ -32,7 +32,6 @@ namespace ZooOnlineStoreApi.Api.Controllers
                     Path = "/"          // Доступ на всех страницах
                     // Domain = "example.com" // Если нужно на поддоменах
                 };
-                HttpContext.Response.Cookies.Append("adminApiKey", apiKey, cookieOptions);
                 HttpContext.Response.Cookies.Append("adminToken", token, cookieOptions);
                 // 200
                 return Ok(token);

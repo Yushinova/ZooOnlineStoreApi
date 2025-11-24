@@ -34,6 +34,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [Authorize]
         public async Task<ActionResult> GetOrdersSorted([FromQuery] int page, [FromQuery] int pageSize)
         {
+            Console.WriteLine("page: "+page+"size: "+pageSize);
             List<Order>? ordersFromDb = await orderService.ListPaginationAsync(page, pageSize);
 
             return Ok(mapper.Map<List<OrderResponse>>(ordersFromDb));
