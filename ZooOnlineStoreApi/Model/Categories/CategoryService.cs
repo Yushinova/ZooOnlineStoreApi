@@ -33,11 +33,11 @@ namespace ZooOnlineStoreApi.Model.Categories
             }
             await _categories.InsertAsync(new Category { Name = name });
         }
-        public async Task<Category> GetByNameAsynk(string name)
+        public async Task<Category?> GetByNameAsynk(string name)
         {
             return await _categories.SelectByName(name);
         }
-        public async Task UpdateAsync(Category category)
+        public async Task DeleteAsync(Category category)
         {
             Category? categoryUpdated = await _categories.GetByIdAsync(category.Id);
             if (category == null)
@@ -45,8 +45,8 @@ namespace ZooOnlineStoreApi.Model.Categories
                 throw new NotFoundException();
 
             }
-            categoryUpdated.Name = category.Name;
-            await _categories.UpdateAsync(categoryUpdated);
+
+            await _categories.DeleteAsync(categoryUpdated);
         }
     }
 }

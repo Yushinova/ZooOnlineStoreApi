@@ -22,6 +22,7 @@ namespace ZooOnlineStoreApi.Api.DTOs
             CreateMap<PetTypeResponse, PetType>();
             CreateMap<PetType, PetTypeShortResponse>();
             CreateMap<PetTypeShortResponse, PetType>();
+            CreateMap<PetTypeUpdate, PetType>();
             CreateMap<Category, CategoryResponse>();
             CreateMap<CategoryResponse, Category>();
             CreateMap<CategoryRequest, Category>();

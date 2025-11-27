@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
@@ -19,6 +20,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
             this.mapper = mapper;
         }
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> InsertAsync([FromBody] ProductImageRequest request)
         {
             try
@@ -38,7 +40,25 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 return BadRequest(error);
             }
         }
+        [HttpDelete]
+        [Authorize]
+        public async Task<IActionResult> DeleteByNameAsync([FromQuery] string name)
+        {
+            try
+            {
+                await productImageService.DeleteByNameAsync(name);
+                return Ok();
+            }
+            catch (NotFoundException ex)
+            {
+                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
+                return NotFound(error);
+            }
+        }
+
+        /////пока не использую
         [HttpDelete("{id:int}")]
+        [Authorize]
         public async Task<IActionResult> DeleteByIdAsync(int id)
         {
             try

@@ -36,7 +36,12 @@ namespace ZooOnlineStoreApi.Model.Products
         }
         public async Task<Product?> SelectByIdAsync(int id)
         {
-            return await _products.GetByIdAsync(id);
+            Product? productFromDb = await _products.GetByIdAsync(id);
+            if (productFromDb == null)
+            {
+                throw new NotFoundException();
+            }
+            return productFromDb;
         }
         public async Task<List<Product>> ListAllAsync()
         {

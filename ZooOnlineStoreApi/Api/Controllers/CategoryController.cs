@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
+using ZooOnlineStoreApi.Api.Jwt;
 using ZooOnlineStoreApi.Model.Categories;
 using ZooOnlineStoreApi.Model.Exeptions;
 using ZooOnlineStoreApi.Model.Users;
@@ -24,7 +26,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
         //
         [HttpGet]
-        public async Task<IActionResult> GetAllAsynk()
+        public async Task<IActionResult> GetAllAsync()
         {
             List<Category> categoriesFromDb = await categories.ListAllAsync();
 
@@ -32,7 +34,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
         //получить по id
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetAllByPetTypeIdAsynk(int id)
+        public async Task<IActionResult> GetAllByPetTypeIdAsync(int id)
         {
 
             List<Category> categoriesFromDb = await categories.ListAllByPetTypeIdAsync(id);
@@ -40,12 +42,13 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
         //добавление
         [HttpPost]
+        [Authorize(Roles = JwtService.ADMIN_ROLE)]
         public async Task<IActionResult> InsertAsync(CategoryRequest data)
         {
             try
             {
                 await categories.InsertAsync(data.Name);
-                Category categoryFromDb = await categories.GetByNameAsynk(data.Name);
+                Category? categoryFromDb = await categories.GetByNameAsynk(data.Name);
                 return Ok(mapper.Map<CategoryResponse>(categoryFromDb));
             }
             catch (DuplicationException ex)
@@ -60,13 +63,14 @@ namespace ZooOnlineStoreApi.Api.Controllers
             }
 
         }
-        //редактирование
-        [HttpPatch]
-        public async Task<IActionResult> UpdateCategoryAsync(Category data)
+        //удаление
+        [HttpDelete]
+        [Authorize(Roles = JwtService.ADMIN_ROLE)]
+        public async Task<IActionResult> DeleteCategoryAsync(Category data)
         {
             try
             {
-                await categories.UpdateAsync(data);
+                await categories.DeleteAsync(data);
                 return Ok(await categories.GetByNameAsynk(data.Name));
             }
             catch (NotFoundException ex)

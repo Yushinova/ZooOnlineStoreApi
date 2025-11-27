@@ -28,6 +28,15 @@ namespace ZooOnlineStoreApi.Model.ProductImages
             }
             await _productImages.DeleteAsync(imageDeleted);
         }
+        public async Task DeleteByNameAsync(string name)
+        {
+            ProductImage? imageDeleted = await _productImages.GetByNameAsync(name);
+            if (imageDeleted == null)
+            {
+                throw new NotFoundException();
+            }
+            await _productImages.DeleteAsync(imageDeleted);
+        }
         public async Task<ProductImage?> GetByNameAsync(string name)
         {
             ProductImage? image = await _productImages.GetByNameAsync(name);

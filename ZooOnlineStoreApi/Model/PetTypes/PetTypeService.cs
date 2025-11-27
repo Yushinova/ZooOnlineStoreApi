@@ -17,18 +17,19 @@ namespace ZooOnlineStoreApi.Model.PetTypes
         {
             return await _petTypes.SelectAllAsync();
         }
-        public async Task<PetType> GetNyNameAsync(string name)
+        public async Task<PetType?> GetNyNameAsync(string name)
         {
             return await _petTypes.SelectByNameAsync(name);
         }
         public async Task InsertAsync(string name, string imageName)
         {
             PetType? type = await _petTypes.SelectByNameAsync(name);
-            if (type == null)
-            {
-                await _petTypes.InsertAsync(new PetType { Name = name, ImageName = imageName });
+            if (type != null)
+            {  
+                throw new DuplicationException("petType", name);
+               
             }
-            throw new DuplicationException("petType", name);
+           await _petTypes.InsertAsync(new PetType { Name = name, ImageName = imageName });
         }
         public async Task UpdateAsync(PetType petType)
         {
@@ -39,6 +40,10 @@ namespace ZooOnlineStoreApi.Model.PetTypes
             }
             type.Name = petType.Name;
             type.ImageName = petType.ImageName;
+            if (type.Categories != null)
+            {
+                type.Categories.Clear();
+            }
             type.Categories = petType.Categories;
             await _petTypes.UpdateAsync(type);
         }
@@ -84,7 +89,8 @@ namespace ZooOnlineStoreApi.Model.PetTypes
                 throw new NotFoundException();
             }
             petTypeUpdated.Categories ??= new HashSet<Category>();//если null инициализируем
-            if (petTypeUpdated.Categories.Any(c => c.Id == categoryId)){
+            if (petTypeUpdated.Categories.Any(c => c.Id == categoryId))
+            {
                 throw new DuplicationException("categoryName", categoryInsert.Name);
             }
             petTypeUpdated.Categories.Add(categoryInsert);

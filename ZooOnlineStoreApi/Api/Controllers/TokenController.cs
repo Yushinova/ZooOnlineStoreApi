@@ -28,7 +28,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
                     HttpOnly = true,     // Защита от XSS
                     Secure = true,       // Только HTTPS (в проде)
                     SameSite = SameSiteMode.None, // Защита от CSRF
-                    Expires = DateTime.UtcNow.AddDays(30), // Долгий срок
+                    Expires = DateTime.UtcNow.AddDays(7), // 7 дней
                     Path = "/"          // Доступ на всех страницах
                     // Domain = "example.com" // Если нужно на поддоменах
                 };
