@@ -37,16 +37,16 @@ namespace ZooOnlineStoreApi.Model.Categories
         {
             return await _categories.SelectByName(name);
         }
-        public async Task DeleteAsync(Category category)
+        public async Task DeleteAsync(int id)
         {
-            Category? categoryUpdated = await _categories.GetByIdAsync(category.Id);
-            if (category == null)
+            Category? categoryDeleted = await _categories.GetByIdAsync(id);
+            if (categoryDeleted == null)
             {
                 throw new NotFoundException();
 
             }
 
-            await _categories.DeleteAsync(categoryUpdated);
+            await _categories.DeleteAsync(categoryDeleted);
         }
     }
 }

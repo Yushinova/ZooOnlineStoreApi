@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
 using ZooOnlineStoreApi.Api.Jwt;
@@ -48,7 +49,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
         
         [HttpPost]
-        [Authorize(Roles = JwtService.ADMIN_ROLE)]
+       // [Authorize(Roles = JwtService.ADMIN_ROLE)]
         public async Task<IActionResult> InsertAsync(PetTypeRequest data)
         {
             try
@@ -70,10 +71,8 @@ namespace ZooOnlineStoreApi.Api.Controllers
 
         }
 
-        //TODO С КАТЕГОРИЯМИ ПЕРЕДЕЛАТЬ
-        //редактирование простых свойств
         [HttpPatch]
-        [Authorize(Roles = JwtService.ADMIN_ROLE)]
+       // [Authorize(Roles = JwtService.ADMIN_ROLE)]
         public async Task<IActionResult> UpdatePetTypeAsync(PetTypeUpdate request)
         {
             try
@@ -101,6 +100,22 @@ namespace ZooOnlineStoreApi.Api.Controllers
             {
                 ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
                 return NotFound(error);
+            }
+        }
+
+        [HttpDelete("{id:int}")]
+       // [Authorize(Roles =JwtService.ADMIN_ROLE)]
+        public async Task<IActionResult> DeleteAsync(int id)
+        {
+            try
+            {
+                await petTypes.DeleteByIdAsync(id);
+                return Ok();
+            }
+            catch (NotFoundException ex) {
+                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
+                return NotFound(error);
+
             }
         }
         //удаление категории из списка типа животного

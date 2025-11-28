@@ -64,14 +64,14 @@ namespace ZooOnlineStoreApi.Api.Controllers
 
         }
         //удаление
-        [HttpDelete]
+        [HttpDelete("{id:int}")]
         [Authorize(Roles = JwtService.ADMIN_ROLE)]
-        public async Task<IActionResult> DeleteCategoryAsync(Category data)
+        public async Task<IActionResult> DeleteCategoryAsync(int id)
         {
             try
             {
-                await categories.DeleteAsync(data);
-                return Ok(await categories.GetByNameAsynk(data.Name));
+                await categories.DeleteAsync(id);
+                return Ok();
             }
             catch (NotFoundException ex)
             {

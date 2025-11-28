@@ -33,7 +33,7 @@ namespace ZooOnlineStoreApi.Model.PetTypes
         }
         public async Task UpdateAsync(PetType petType)
         {
-            PetType? type = await _petTypes.GetByIdAsync(petType.Id);
+            PetType? type = await _petTypes.SelectByIdWithCategories(petType.Id);
             if (type == null)
             {
                 throw new NotFoundException();
@@ -46,6 +46,15 @@ namespace ZooOnlineStoreApi.Model.PetTypes
             }
             type.Categories = petType.Categories;
             await _petTypes.UpdateAsync(type);
+        }
+        public async Task DeleteByIdAsync(int id)
+        {
+            PetType? petTypeDeleted = await _petTypes.GetByIdAsync(id);
+            if (petTypeDeleted == null)
+            {
+                throw new NotFoundException();
+            }
+            await _petTypes.DeleteAsync(petTypeDeleted);
         }
         public async Task<List<PetType>> ListAllWithCategories()
         {
