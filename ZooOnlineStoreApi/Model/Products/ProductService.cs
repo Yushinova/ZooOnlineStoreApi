@@ -28,7 +28,7 @@ namespace ZooOnlineStoreApi.Model.Products
         {
             if (parameters.Page < 1) parameters.Page = 1;
             if (parameters.PageSize < 1) parameters.PageSize = 10;
-           return await _products.SelectAllWithFilters(parameters);
+            return await _products.SelectAllWithFilters(parameters);
         }
         public async Task<Product?> SelectByIdWithAllInfoAsync(int id)
         {
@@ -56,6 +56,16 @@ namespace ZooOnlineStoreApi.Model.Products
                 {
                     productFromDb.Quantity -= quantity;
                 }
+                await _products.UpdateAsync(productFromDb);
+            }
+
+        }
+        public async Task AddQuantityByIdAsync(int id, int quantity)
+        {
+            Product? productFromDb = await _products.GetByIdAsync(id);
+            if (productFromDb != null)
+            {
+                productFromDb.Quantity += quantity;
                 await _products.UpdateAsync(productFromDb);
             }
 
@@ -114,7 +124,7 @@ namespace ZooOnlineStoreApi.Model.Products
         public async Task DeleteAsync(int id)
         {
             Product? productFromDb = await _products.GetByIdAsync(id);
-            if (productFromDb==null)
+            if (productFromDb == null)
             {
                 throw new NotFoundException();
             }

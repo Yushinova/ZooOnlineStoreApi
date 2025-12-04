@@ -33,9 +33,18 @@ namespace ZooOnlineStoreApi.Model.Categories
             }
             await _categories.InsertAsync(new Category { Name = name });
         }
-        public async Task<Category?> GetByNameAsynk(string name)
+        public async Task<Category?> GetByNameAsync(string name)
         {
             return await _categories.SelectByName(name);
+        }
+        public async Task<Category?> GetByIdAsync(int id)
+        {
+            Category? category = await _categories.GetByIdAsync(id);
+            if (category == null)
+            {
+                throw new NotFoundException();
+            }
+            return category;
         }
         public async Task DeleteAsync(int id)
         {

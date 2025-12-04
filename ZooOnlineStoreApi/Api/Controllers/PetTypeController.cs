@@ -49,7 +49,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
         
         [HttpPost]
-       // [Authorize(Roles = JwtService.ADMIN_ROLE)]
+        [Authorize(Roles = JwtService.ADMIN_ROLE)]
         public async Task<IActionResult> InsertAsync(PetTypeRequest data)
         {
             try
@@ -72,7 +72,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
 
         [HttpPatch]
-       // [Authorize(Roles = JwtService.ADMIN_ROLE)]
+        [Authorize(Roles = JwtService.ADMIN_ROLE)]
         public async Task<IActionResult> UpdatePetTypeAsync(PetTypeUpdate request)
         {
             try
@@ -104,7 +104,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
 
         [HttpDelete("{id:int}")]
-       // [Authorize(Roles =JwtService.ADMIN_ROLE)]
+        [Authorize(Roles =JwtService.ADMIN_ROLE)]
         public async Task<IActionResult> DeleteAsync(int id)
         {
             try

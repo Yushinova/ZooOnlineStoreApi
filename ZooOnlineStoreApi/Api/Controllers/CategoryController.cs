@@ -34,11 +34,11 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
         //получить по id
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetAllByPetTypeIdAsync(int id)
+        public async Task<IActionResult> GetById(int id)
         {
 
-            List<Category> categoriesFromDb = await categories.ListAllByPetTypeIdAsync(id);
-            return Ok(mapper.Map<List<CategoryResponse>>(categoriesFromDb));
+            Category? categoryFromDb = await categories.GetByIdAsync(id);
+            return Ok(mapper.Map<CategoryResponse>(categoryFromDb));
         }
         //добавление
         [HttpPost]
@@ -48,7 +48,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
             try
             {
                 await categories.InsertAsync(data.Name);
-                Category? categoryFromDb = await categories.GetByNameAsynk(data.Name);
+                Category? categoryFromDb = await categories.GetByNameAsync(data.Name);
                 return Ok(mapper.Map<CategoryResponse>(categoryFromDb));
             }
             catch (DuplicationException ex)

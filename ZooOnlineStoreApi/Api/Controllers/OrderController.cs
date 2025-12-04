@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
 using ZooOnlineStoreApi.Model.Exeptions;
+using ZooOnlineStoreApi.Model.OrderItems;
 using ZooOnlineStoreApi.Model.Orders;
 using ZooOnlineStoreApi.Model.Products;
 using ZooOnlineStoreApi.Model.Users;
@@ -12,19 +13,22 @@ namespace ZooOnlineStoreApi.Api.Controllers
 {
     [Route("api/order")]
     [ApiController]
-    public class OrderController: ControllerBase
+    public class OrderController : ControllerBase
     {
         private readonly OrderService orderService;
         private readonly ProductService productService;
+        private readonly OrderItemService orderItemService;
         private readonly UserService userService;
         private readonly IMapper mapper;
         public OrderController(OrderService orderService,
                 ProductService productService,
+                OrderItemService orderItemService,
                 IMapper mapper,
                 UserService userService)
         {
             this.orderService = orderService;
             this.productService = productService;
+            this.orderItemService = orderItemService;
             this.mapper = mapper;
             this.userService = userService;
         }
@@ -34,7 +38,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [Authorize]
         public async Task<ActionResult> GetOrdersSorted([FromQuery] int page, [FromQuery] int pageSize)
         {
-            Console.WriteLine("page: "+page+"size: "+pageSize);
+            Console.WriteLine("page: " + page + "size: " + pageSize);
             List<Order>? ordersFromDb = await orderService.ListPaginationAsync(page, pageSize);
 
             return Ok(mapper.Map<List<OrderResponse>>(ordersFromDb));
@@ -42,17 +46,26 @@ namespace ZooOnlineStoreApi.Api.Controllers
 
         [HttpPatch("admin/{id:int}")]
         [Authorize]
-        public async Task<IActionResult> UpdateByIdAsync([FromBody] OrderUpdateRequest request, int id)
+        public async Task<IActionResult> UpdateByIdAsync(int id, [FromBody] OrderUpdateRequest request)
         {
             try
             {
                 Order? orderFromDb = await orderService.GetByIdAsync(id);
-                if (orderFromDb != null)
+                orderFromDb.Amount -= orderFromDb.ShippingCost;
+                orderFromDb.ShippingCost = request.ShippingCost;
+                orderFromDb.Status = request.Status;
+                orderFromDb.Amount += request.ShippingCost;
+                await orderService.UndateAsync(orderFromDb);
+                if (request.Status.ToLower().Contains("del"))
                 {
-                    orderFromDb.ShippingCost = request.ShippingCost;
-                    orderFromDb.ShippingAddress = request.ShippingAddress;
-                    orderFromDb.Status = request.Status;
-                    await orderService.UndateAsync(orderFromDb);
+                    List<OrderItem>? itemsByOrderId = await orderItemService.ListAllByOrderIdAsync(id);
+                    if (itemsByOrderId != null && itemsByOrderId.Count > 0)
+                    {
+                        foreach (var item in itemsByOrderId)
+                        {
+                            await productService.AddQuantityByIdAsync(item.ProductId, item.Quantity);
+                        }
+                    }
                 }
                 return Ok(mapper.Map<OrderResponse>(orderFromDb));
             }

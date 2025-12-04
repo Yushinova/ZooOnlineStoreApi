@@ -33,9 +33,6 @@ namespace ZooOnlineStoreApi.Model.Orders
             {
                 throw new NotFoundException();
             }
-            orderFromDb.ShippingCost = entity.ShippingCost;
-            orderFromDb.Status = entity.Status;
-            orderFromDb.Amount = entity.Amount;
             return await _orderRepository.UpdateReturnEntityAsync(orderFromDb);
         }
         public async Task<List<Order>> ListAllAsync()
