@@ -40,6 +40,14 @@ namespace ZooOnlineStoreApi.Api.Controllers
             Category? categoryFromDb = await categories.GetByIdAsync(id);
             return Ok(mapper.Map<CategoryResponse>(categoryFromDb));
         }
+        //получить по id
+        [HttpGet("pettype/{id:int}")]
+        public async Task<IActionResult> GetByPetTypeIdAsync(int id)
+        {
+
+            List<Category>? categoryFromDb = await categories.ListAllByPetTypeIdAsync(id);
+            return Ok(mapper.Map<List<CategoryResponse>>(categoryFromDb));
+        }
         //добавление
         [HttpPost]
         [Authorize(Roles = JwtService.ADMIN_ROLE)]
