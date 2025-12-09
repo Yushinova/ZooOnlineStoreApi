@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using System.Xml.Linq;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Model.Exeptions;
@@ -69,6 +70,14 @@ namespace ZooOnlineStoreApi.Model.Products
                 await _products.UpdateAsync(productFromDb);
             }
 
+        }
+        public async Task UpdateRatingAsync(int productId, double newRating)
+        {
+            var product = await _products.GetByIdAsync(productId);
+            if (product == null) return;
+
+            product.Rating = newRating;
+            await _products.UpdateAsync(product);
         }
         public async Task UpdateAsync(Product product)
         {

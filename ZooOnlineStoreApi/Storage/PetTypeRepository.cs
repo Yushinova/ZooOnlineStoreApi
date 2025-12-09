@@ -30,7 +30,7 @@ namespace ZooOnlineStoreApi.Storage
 
         public async Task<List<PetType>> SelectAllAsync()
         {
-            return await _context.PetTypes.ToListAsync();
+            return await _context.PetTypes.OrderBy(P=>P.Id).ToListAsync();
         }
 
         public async Task<List<PetType>> SelectAllByProductIdAsync(int productId)
@@ -40,7 +40,7 @@ namespace ZooOnlineStoreApi.Storage
 
         public async Task<List<PetType>> SelectAllWithCategoies()
         {
-            return await _context.PetTypes.Include(p => p.Categories).ToListAsync();
+            return await _context.PetTypes.Include(p => p.Categories).OrderBy(P => P.Id).ToListAsync();
         }
 
         public async Task<PetType?> SelectByIdWithCategories(int id)

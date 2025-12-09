@@ -23,6 +23,14 @@ namespace ZooOnlineStoreApi.Storage
             return await _context.Feedbacks.FirstOrDefaultAsync(f => f.Id == id);
         }
 
+        public async Task<Feedback?> InsertAndRerunAsync(Feedback entity)
+        {
+            await _context.AddAsync(entity);
+            await _context.SaveChangesAsync();
+            Feedback? feedbackWithUser = await _context.Feedbacks.Include(f => f.User).FirstOrDefaultAsync(f => f.Id == entity.Id);
+            return feedbackWithUser;
+        }
+
         public async Task InsertAsync(Feedback entity)
         {
             await _context.AddAsync(entity);
@@ -36,7 +44,7 @@ namespace ZooOnlineStoreApi.Storage
 
         public async Task<List<Feedback>?> SelectByProductIdAsync(int productId)
         {
-            return await _context.Feedbacks.Where(f=>f.ProductId == productId).ToListAsync();
+            return await _context.Feedbacks.Where(f=>f.ProductId == productId).OrderByDescending(f => f.Id).ToListAsync();
         }
 
         public async Task<List<Feedback>?> SelectByProductIdWithPaginationAsync(int productId, int page, int count)

@@ -23,23 +23,17 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> AddNewFeedbackAsync([FromBody] FeedbackRequest request)
         {
             try
             {
                 Feedback feedbackInsert = mapper.Map<Feedback>(request);
                 feedbackInsert.CreatedAt = DateTime.UtcNow;
-                await feedbackService.InsertAsync(feedbackInsert);
-                //Product rating update
-                Product? productFromDb = await productService.SelectByIdAsync(feedbackInsert.ProductId);
+                Feedback? newFeedback = await feedbackService.InsertAsync(feedbackInsert);
                 double ratingAverage = await feedbackService.GetAverageProductRatingAsync(feedbackInsert.ProductId);
-                if (productFromDb != null)
-                {
-                    productFromDb.Rating = ratingAverage;
-                    await productService.UpdateAsync(productFromDb);
-                }
-                return Ok();
+                await productService.UpdateRatingAsync(feedbackInsert.ProductId, ratingAverage);
+                return Ok(mapper.Map<FeedbackResponse>(newFeedback));
             }
             catch (Exception ex)
             {
@@ -49,18 +43,25 @@ namespace ZooOnlineStoreApi.Api.Controllers
 
         }
 
-        [HttpGet]
+        [HttpGet]//тесты
         public async Task<IActionResult> GetAllFeedbacksAsync()
         {
             List<Feedback>? feedbacksFromDb = await feedbackService.ListAllAsync();
             return Ok(mapper.Map<List<FeedbackResponse>>(feedbacksFromDb));
         }
-        [HttpGet("{productId:int}")]
-        public async Task<IActionResult> GetAllByProductIdAsync([FromQuery] int page, [FromQuery] int pageSize, int productId )
+
+        [HttpGet("product/top/{productId:int}")]
+        public async Task<IActionResult> GetTopByProductIdAsync([FromQuery] int page, [FromQuery] int pageSize, int productId )
         {
             List<Feedback>? feedbacksFromDb = await feedbackService.GetAllByProductIdWithPaginationAsync(productId, page, pageSize);
             return Ok(mapper.Map<List<FeedbackResponse>>(feedbacksFromDb));
         }
 
+        [HttpGet("product/{productId:int}")]
+        public async Task<IActionResult> GetAllByProductIdAsync(int productId)
+        {
+            List<Feedback>? feedbacksFromDb = await feedbackService.GetAllByProductIdAsync(productId);
+            return Ok(mapper.Map<List<FeedbackResponse>>(feedbacksFromDb));
+        }
     }
 }

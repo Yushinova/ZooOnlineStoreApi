@@ -10,9 +10,9 @@ namespace ZooOnlineStoreApi.Model.Feedbacks
             _feedbackRepository = feedbackRepository;
 
         }
-        public async Task InsertAsync(Feedback feedback)
+        public async Task<Feedback?> InsertAsync(Feedback feedback)
         {
-            await _feedbackRepository.InsertAsync(feedback);
+            return await _feedbackRepository.InsertAndRerunAsync(feedback);
         }
         public async Task<List<Feedback>?> ListAllAsync()
         {
@@ -29,6 +29,10 @@ namespace ZooOnlineStoreApi.Model.Feedbacks
             if (page < 1) page = 1;
             int skip = (page - 1) * count;
             return await _feedbackRepository.SelectByProductIdWithPaginationAsync(productId, skip, count);
+        }
+        public async Task<List<Feedback>?> GetAllByProductIdAsync(int productId)
+        {
+            return await _feedbackRepository.SelectByProductIdAsync(productId);
         }
         public async Task<double> GetAverageProductRatingAsync(int productId)
         {
