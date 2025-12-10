@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Numerics;
 using ZooOnlineStoreApi.Model.Interfaces;
 using ZooOnlineStoreApi.Model.Users;
 
@@ -17,6 +18,11 @@ namespace ZooOnlineStoreApi.Storage
             await _context.SaveChangesAsync();
         }
 
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
         public async Task<User?> GetByIdAsync(int id)
         {
           return await _context.Users.FirstOrDefaultAsync(u=>u.Id == id);
@@ -25,11 +31,6 @@ namespace ZooOnlineStoreApi.Storage
         public async Task<User?> GetByPhoneAsync(string phone)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Phone == phone);
-        }
-
-        public async Task<User?> GetByUUIDAsync(Guid uuid)
-        {
-           return await _context.Users.FirstOrDefaultAsync(u=>u.UUID == uuid);
         }
 
         public async Task InsertAsync(User entity)

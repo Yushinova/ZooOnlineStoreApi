@@ -36,6 +36,7 @@ namespace ZooOnlineStoreApi.Api.DTOs
             CreateMap<User, UserAuthResponse>();
             CreateMap<User, UserOrderResponse>();
             CreateMap<User, UserFeedbackResponse>();
+            CreateMap<UserRequest, User>();
             CreateMap<Address, AddressResponse>();
             CreateMap<AddressRequest, Address>();
             CreateMap<OrderItem, OrderItemResponse>();

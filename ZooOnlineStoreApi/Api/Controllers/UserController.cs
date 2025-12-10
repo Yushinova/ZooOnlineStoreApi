@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
+using ZooOnlineStoreApi.Model.Admins;
 using ZooOnlineStoreApi.Model.Exeptions;
 using ZooOnlineStoreApi.Model.Interfaces;
 using ZooOnlineStoreApi.Model.Orders;
@@ -19,12 +20,10 @@ namespace ZooOnlineStoreApi.Api.Controllers
         private readonly UserService userService;
 
         private readonly IMapper mapper;
-        private readonly IEncoder encoder;
-        public UserController(UserService userService, IMapper mapper, IEncoder encoder)
+        public UserController(UserService userService, IMapper mapper)
         {
             this.userService = userService;
             this.mapper = mapper;
-            this.encoder = encoder;
 
         }
         [HttpPost("register")]
@@ -32,21 +31,9 @@ namespace ZooOnlineStoreApi.Api.Controllers
         {
             try
             {
-                User user = new User
-                {
-                    Name = request.Name,
-                    Email = request.Email,
-                    Phone = request.Phone,
-                    Password = encoder.Encode(request.Password),//хэшируем
-                    UUID = Guid.NewGuid(),
-                    RegisteredAt = DateTime.UtcNow,
-                    Discont = 0,
-                    TotalOrders = 0,
-                };
-                User? userFromDb = await userService.RegisterAsync(user);
-                UserAuthResponse response = mapper.Map<UserAuthResponse>(userFromDb);
-                response.Token = encoder.Encode(generateApiKey(user));
-                return Ok(response);
+                User user = mapper.Map<User>(request);
+                string apiKey = await userService.RegisterAsync(user);
+                return Ok(apiKey);
             }
             catch (ValidationException ex)
             {
@@ -65,16 +52,28 @@ namespace ZooOnlineStoreApi.Api.Controllers
             }
 
         }
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            try
+            {
+               HttpContext.Response.Cookies.Delete("userToken");
 
+               return Ok(new { message = "Logged out successfully" });
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
+                return BadRequest(error);
+            }
+        }
         [HttpPost("login")]
         public async Task<ActionResult> LoginAsync([FromBody] UserLoginRequest request)
         {
             try
             {
-                User userFromDb = await userService.AuthenticateAsync(request.Phone, request.Password);
-                UserAuthResponse response = mapper.Map<UserAuthResponse>(userFromDb);
-                response.Token = encoder.Encode(generateApiKey(userFromDb));
-                return Ok(response);
+                string apiKey = await userService.LoginAsync(request.Phone, request.Password);
+                return Ok(apiKey);
             }
             catch (ValidationException ex)
             {
@@ -88,14 +87,30 @@ namespace ZooOnlineStoreApi.Api.Controllers
             }
         }
 
-        [HttpGet]//test
+        //[HttpGet]//test
+        //[Authorize]
+        //public async Task<IActionResult> ListAllAsync()
+        //{
+        //    List<User> usersFromDb = await userService.ListAllAsync();
+        //    return Ok(mapper.Map<List<UserResponse>>(usersFromDb));
+        //}
+        [HttpGet]
         [Authorize]
-        public async Task<IActionResult> ListAllAsync()
+        public async Task<IActionResult> GetInfoAsync([FromHeader(Name = "X-Api-Key")] string apiKey)
         {
-            List<User> usersFromDb = await userService.ListAllAsync();
-            return Ok(mapper.Map<List<UserResponse>>(usersFromDb));
+            try
+            {
+                User userFromDb = await userService.GetUserAsync(apiKey);
+                // 200
+                return Ok(mapper.Map<UserResponse>(userFromDb));
+            }
+            catch (NotFoundException ex)
+            {
+                // 404
+                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
+                return NotFound(error);
+            }
         }
-
         [HttpGet("{id:int}")]
         [Authorize]
         public async Task<IActionResult> GetByIdAsynk(int id)
@@ -128,10 +143,5 @@ namespace ZooOnlineStoreApi.Api.Controllers
             }
         }
 
-        // генерация api-ключа для пользователя
-        private string generateApiKey(User user)
-        {
-            return encoder.Encode($"{user.UUID} - {user.Phone} - {user.Email} - {user.RegisteredAt}");
-        }
     }
 }

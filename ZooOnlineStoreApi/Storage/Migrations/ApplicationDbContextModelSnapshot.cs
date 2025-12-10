@@ -390,15 +390,9 @@ namespace ZooOnlineStoreApi.Storage.Migrations
                     b.Property<decimal>("TotalOrders")
                         .HasColumnType("numeric");
 
-                    b.Property<Guid>("UUID")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Phone")
-                        .IsUnique();
-
-                    b.HasIndex("UUID")
                         .IsUnique();
 
                     b.ToTable("Users");

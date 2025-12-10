@@ -22,31 +22,45 @@ namespace ZooOnlineStoreApi.Model.Users
             _userRepository = userRepository;
             _encoder = encoder;
         }
-        public async Task<User?> RegisterAsync(User user)//первая регистрация
+        public async Task<string> RegisterAsync(User user)//первая регистрация
         {
-            User? userFromDb = await _userRepository.GetByPhoneAsync(user.Phone);
-            if (userFromDb == null)
+            // валидация строк
+            if (!Regex.IsMatch(user.Phone, phonePattern))
             {
-
-                // валидация строк
-                if (!Regex.IsMatch(user.Phone, phonePattern))
-                {
-                    throw new ValidationException("phone", "phone is inavalid", user.Phone);
-                }
-                if (!Regex.IsMatch(user.Email, emailPattern))
-                {
-                    throw new ValidationException("email", "email is invalid", user.Email);
-                }
-                await _userRepository.InsertAsync(user);
-
-                return await _userRepository.GetByPhoneAsync(user.Phone);
+                throw new ValidationException("phon4", "phone is invalid", user.Phone);
             }
-            else
+            if (!Regex.IsMatch(user.Email, emailPattern))
             {
-                throw new DuplicationException("user is duplicated", user.Phone);
+                throw new ValidationException("email", "email is invalid", user.Email);
             }
+
+            // проверка на дубликацию
+            bool isLoginDuplicated = await _userRepository.GetByPhoneAsync(user.Phone) != null;
+            if (isLoginDuplicated)
+            {
+                throw new DuplicationException("login", user.Phone);
+            }
+            bool isEmailDuplicated = await _userRepository.GetByEmailAsync(user.Email) != null;
+            if (isEmailDuplicated)
+            {
+                throw new DuplicationException("email", user.Email);
+            }
+
+            // выполним регистрацию
+            User newUser = new User()
+            {
+                UUID = Guid.NewGuid(), // генерация UUID для пользователя
+                Name = user.Name,
+                Phone = user.Phone,
+                Email = user.Email,
+                Password = _encoder.Encode(user.Password),
+                RegisteredAt = DateTime.UtcNow
+            };
+            string apiKey = generateApiKey(newUser);
+            await _userRepository.InsertAsync(newUser);
+            return apiKey;
         }
-        public async Task<User> AuthenticateAsync(string login, string password)
+        public async Task<string> LoginAsync(string login, string password)
         {
             if (!Regex.IsMatch(login, phonePattern))
             {
@@ -61,7 +75,7 @@ namespace ZooOnlineStoreApi.Model.Users
             {
                 throw new UnauthorizedAccessException("error password");
             }
-            return userFromDb;
+            return generateApiKey(userFromDb);
 
         }
         public async Task<List<User>> ListAllAsync()
@@ -107,8 +121,7 @@ namespace ZooOnlineStoreApi.Model.Users
             List<User> usersFromDb = await _userRepository.SelectAllAsync();
             foreach (var item in usersFromDb)
             {
-                var generatedKey = generateApiKey(item);
-                if (_encoder.Verify(generatedKey, apiKey))
+                if (generateApiKey(item) == apiKey)
                 {
                     return item;
                 }

@@ -13,7 +13,7 @@ namespace ZooOnlineStoreApi.Model.Users
         public string Phone { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public int Discont { get; set; } = 0;
-        public string? Email { get; set; }
+        public string? Email { get; set; } = string.Empty;
         public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
         public decimal TotalOrders { get; set; } = 0;
         public HashSet<Address>? Addresses { get; set; }
