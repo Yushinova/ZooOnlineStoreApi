@@ -58,6 +58,11 @@ namespace ZooOnlineStoreApi.Storage
             .ToListAsync();
         }
 
+        public async Task<Feedback?> SelectByUserIdAndProductId(int userId, int productId)
+        {
+            return await _context.Feedbacks.FirstOrDefaultAsync(f => f.UserId == userId && f.ProductId == productId);
+        }
+
         public async Task<List<Feedback>?> SelectByUserIdWithPaginationAsync(int userId, int page, int count)
         {
             return await _context.Feedbacks

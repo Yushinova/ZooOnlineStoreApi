@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
 using ZooOnlineStoreApi.Model.Feedbacks;
@@ -23,7 +25,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
 
         [HttpPost]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> AddNewFeedbackAsync([FromBody] FeedbackRequest request)
         {
             try
@@ -41,6 +43,39 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 return BadRequest(error);
             }
 
+        }
+
+        [HttpGet("check/{productId}")]
+        [Authorize]
+        public async Task<IActionResult> CheckUserReview(int productId) // или Guid
+        {
+            try
+            {
+                // Получаем int userId из токена
+                var userId = User.FindFirst("userId")?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new StringMessage("User ID not found in token"));
+                }
+                int id = int.Parse(userId);
+                // ⭐ Ищем отзыв с int userId
+                var existingReview = await feedbackService.GetByUserIdAndProductIdAsync(id, productId);
+
+                if (existingReview != null) {
+                    return Ok(mapper.Map<FeedbackResponse>(existingReview));
+                }
+                else
+                {
+                    return Ok(new StringMessage("Feedback exist with product: "+productId));
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
+                return BadRequest(error);
+            }
         }
 
         [HttpGet]//тесты

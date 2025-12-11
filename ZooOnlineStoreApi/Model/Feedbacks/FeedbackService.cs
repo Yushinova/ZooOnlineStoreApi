@@ -14,6 +14,12 @@ namespace ZooOnlineStoreApi.Model.Feedbacks
         {
             return await _feedbackRepository.InsertAndRerunAsync(feedback);
         }
+        public async Task<Feedback?> GetByUserIdAndProductIdAsync(int userId, int productId)
+        {
+            Feedback? feedback = await _feedbackRepository.SelectByUserIdAndProductId(userId,productId);
+            return feedback;
+
+        }
         public async Task<List<Feedback>?> ListAllAsync()
         {
             return await _feedbackRepository.SelectAllAsync();

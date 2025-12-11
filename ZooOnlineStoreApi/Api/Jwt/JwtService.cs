@@ -124,6 +124,7 @@ namespace ZooOnlineStoreApi.Api.Jwt
                 List<Claim> claims = new List<Claim>()
         {
             new Claim(ClaimTypes.Name, user.Name),
+            new Claim("userId", user.Id.ToString()), // ⭐ int в string
             new Claim(ClaimTypes.NameIdentifier, user.Phone),
             new Claim(ClaimTypes.Role, USER_ROLE),
             new Claim("UserType", "User") // Добавляем тип пользователя
