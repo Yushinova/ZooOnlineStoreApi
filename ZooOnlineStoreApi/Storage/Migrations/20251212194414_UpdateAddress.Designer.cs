@@ -12,8 +12,8 @@ using ZooOnlineStoreApi.Storage;
 namespace ZooOnlineStoreApi.Storage.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251118180055_UpdateUser")]
-    partial class UpdateUser
+    [Migration("20251212194414_UpdateAddress")]
+    partial class UpdateAddress
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -63,26 +63,10 @@ namespace ZooOnlineStoreApi.Storage.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Home")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PostalCode")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Street")
+                    b.Property<string>("FullAddress")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -322,6 +306,7 @@ namespace ZooOnlineStoreApi.Storage.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Brand")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("CategoryId")
@@ -344,7 +329,7 @@ namespace ZooOnlineStoreApi.Storage.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
-                    b.Property<double?>("Rating")
+                    b.Property<double>("Rating")
                         .HasColumnType("double precision");
 
                     b.Property<bool>("isActive")

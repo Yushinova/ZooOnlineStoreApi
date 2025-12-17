@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
+using ZooOnlineStoreApi.Api.Jwt;
 using ZooOnlineStoreApi.Model.Feedbacks;
 using ZooOnlineStoreApi.Model.Products;
 
@@ -25,7 +26,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> AddNewFeedbackAsync([FromBody] FeedbackRequest request)
         {
             try
@@ -46,8 +47,8 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
 
         [HttpGet("check/{productId}")]
-        [Authorize]
-        public async Task<IActionResult> CheckUserReview(int productId) // или Guid
+        [Authorize(Roles = JwtService.USER_ROLE)]
+        public async Task<IActionResult> CheckUserFeedbackAsync(int productId) // или Guid
         {
             try
             {

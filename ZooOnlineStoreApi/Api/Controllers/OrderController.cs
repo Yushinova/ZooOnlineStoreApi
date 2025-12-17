@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
+using ZooOnlineStoreApi.Api.Jwt;
 using ZooOnlineStoreApi.Model.Exeptions;
 using ZooOnlineStoreApi.Model.OrderItems;
 using ZooOnlineStoreApi.Model.Orders;
@@ -82,7 +83,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
 
         [HttpPost("user")]//добавление нового заказа юзером
-        [Authorize]
+        [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> AddNewOrderAsync([FromBody] OrderRequest request)
         {
             try
@@ -117,7 +118,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
 
         [HttpGet("user/{userId:int}")]//получение всех заказов юзером
-        [Authorize]
+        [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> ListAllByUserId(int userId)
         {
             try

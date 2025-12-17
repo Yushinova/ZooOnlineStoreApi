@@ -60,26 +60,10 @@ namespace ZooOnlineStoreApi.Storage.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Home")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PostalCode")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Street")
+                    b.Property<string>("FullAddress")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -390,9 +374,15 @@ namespace ZooOnlineStoreApi.Storage.Migrations
                     b.Property<decimal>("TotalOrders")
                         .HasColumnType("numeric");
 
+                    b.Property<Guid>("UUID")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Phone")
+                        .IsUnique();
+
+                    b.HasIndex("UUID")
                         .IsUnique();
 
                     b.ToTable("Users");
