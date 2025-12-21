@@ -19,12 +19,12 @@ namespace ZooOnlineStoreApi.Storage
 
         public async Task<List<Order>?> GetAllWithPagination(int skipItems, int countItems)
         {
-          return await _context.Orders.Include(o=>o.User).Include(o=>o.OrderItems).OrderByDescending(o=>o.Id).Skip(skipItems).Take(countItems).ToListAsync();
+          return await _context.Orders.Include(o=>o.User).Include(o=>o.OrderItems).Include(o=>o.Payment).OrderByDescending(o=>o.Id).Skip(skipItems).Take(countItems).ToListAsync();
         }
 
         public Task<Order?> GetByIdAsync(int id)
         {
-            return _context.Orders.Include(o => o.User).Include(o => o.OrderItems).FirstOrDefaultAsync(o => o.Id == id);
+            return _context.Orders.Include(o => o.User).Include(o => o.OrderItems).Include(o=>o.Payment).FirstOrDefaultAsync(o => o.Id == id);
         }
 
         public Task<Order?> GetByIdWithItemsAsync(int id)
@@ -62,7 +62,7 @@ namespace ZooOnlineStoreApi.Storage
 
         public async Task<List<Order>?> SelectAllByUserIdAsync(int userId)
         {
-            return await _context.Orders.Include(o=>o.OrderItems).Include(o=>o.User).Where(o=>o.UserId== userId).OrderByDescending(o=>o.Id).ToListAsync();
+            return await _context.Orders.Include(o=>o.OrderItems).Include(o=>o.User).Include(o=>o.Payment).Where(o=>o.UserId== userId).OrderByDescending(o=>o.Id).ToListAsync();
         }
 
         public async Task UpdateAsync(Order entity)

@@ -80,21 +80,21 @@ namespace ZooOnlineStoreApi.Api.Controllers
             try
             {
 
-                Product petTypeUpdate = mapper.Map<Product>(request);
+                Product productUpdate = mapper.Map<Product>(request);
                 if (request.PetTypeIds != null && request.PetTypeIds.Any())
                 {
                     List<PetType> petTypesFromDb = await petTypeService.ListAllAsync();
-                    petTypeUpdate.PetTypes = new HashSet<PetType>();
+                    productUpdate.PetTypes = new HashSet<PetType>();
                     foreach (var item in petTypesFromDb)
                     {
                         if (request.PetTypeIds.Contains(item.Id))
                         {
-                            petTypeUpdate.PetTypes.Add(item);
+                            productUpdate.PetTypes.Add(item);
                         }
                     }
                 }
-                petTypeUpdate.Id = id;
-                await productService.UpdateAsync(petTypeUpdate);
+                productUpdate.Id = id;
+                await productService.UpdateAsync(productUpdate);
                 Product? productFromDb = await productService.SelectByIdWithAllInfoAsync(id);
                 return Ok(mapper.Map<ProductResponse>(productFromDb));
 

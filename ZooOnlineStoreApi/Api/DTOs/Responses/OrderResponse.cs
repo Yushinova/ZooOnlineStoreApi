@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using ZooOnlineStoreApi.Model.OrderItems;
+using ZooOnlineStoreApi.Model.Payments;
 using ZooOnlineStoreApi.Model.Users;
 
 namespace ZooOnlineStoreApi.Api.DTOs.Responses
@@ -13,7 +14,12 @@ namespace ZooOnlineStoreApi.Api.DTOs.Responses
         public string Status { get; set; } = string.Empty;//Kart, Paid, Processing, Shipped, Delivered, Deleted
         public DateTime CreatedAt { get; set; }
         public string ShippingAddress { get; set; } = string.Empty;
+        public PaymentResponse? Payment { get; set; }
         public UserOrderResponse User { get; set; }
         public List<OrderItemResponse> OrderItems { get; set; }
+    }
+    public class OrderPaymentResponse
+    {
+        public string OrderNumber { get; set; } = string.Empty;
     }
 }

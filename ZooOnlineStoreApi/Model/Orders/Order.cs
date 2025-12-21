@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using ZooOnlineStoreApi.Model.OrderItems;
+using ZooOnlineStoreApi.Model.Payments;
 using ZooOnlineStoreApi.Model.Users;
 
 namespace ZooOnlineStoreApi.Model.Orders
@@ -10,10 +11,11 @@ namespace ZooOnlineStoreApi.Model.Orders
         public string OrderNumber { get; set; } = string.Empty;
         public decimal ShippingCost { get; set; } = 0;
         public decimal Amount { get; set; } = 0;
-        public string Status { get; set; } = string.Empty;//Kart, Paid, Processing, Shipped, Delivered, Deleted
+        public string Status { get; set; } = string.Empty;//New, Paid, Processing, Shipped, Delivered, Deleted
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string ShippingAddress { get; set; } = string.Empty;
         //связи 
+        public Payment? Payment { get; set; }//один к одному связь
         public int UserId { get; set; }
 
         [ForeignKey(nameof(UserId))]

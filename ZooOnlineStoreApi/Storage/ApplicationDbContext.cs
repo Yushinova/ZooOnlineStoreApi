@@ -6,6 +6,7 @@ using ZooOnlineStoreApi.Model.Categories;
 using ZooOnlineStoreApi.Model.Feedbacks;
 using ZooOnlineStoreApi.Model.OrderItems;
 using ZooOnlineStoreApi.Model.Orders;
+using ZooOnlineStoreApi.Model.Payments;
 using ZooOnlineStoreApi.Model.PetTypes;
 using ZooOnlineStoreApi.Model.ProductImages;
 using ZooOnlineStoreApi.Model.Products;
@@ -26,6 +27,7 @@ namespace ZooOnlineStoreApi.Storage
         public required DbSet<Product> Products { get; set; }
         public required DbSet<ProductImage> ProductImages { get; set; }
         public required DbSet<User> Users { get; set; }
+        public required DbSet<Payment> Payments { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             IConfigurationRoot config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();

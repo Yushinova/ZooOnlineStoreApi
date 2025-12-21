@@ -10,6 +10,7 @@ using ZooOnlineStoreApi.Model.Feedbacks;
 using ZooOnlineStoreApi.Model.Interfaces;
 using ZooOnlineStoreApi.Model.OrderItems;
 using ZooOnlineStoreApi.Model.Orders;
+using ZooOnlineStoreApi.Model.Payments;
 using ZooOnlineStoreApi.Model.PetTypes;
 using ZooOnlineStoreApi.Model.ProductImages;
 using ZooOnlineStoreApi.Model.Products;
@@ -53,6 +54,8 @@ builder.Services.AddTransient<FeedbackService>();
 builder.Services.AddTransient<IAdminRepository, AdminRepository>();
 builder.Services.AddTransient<AdminService>();
 builder.Services.AddTransient<JwtService>();
+builder.Services.AddTransient<IPaymentRepository, PaymentRepository>();
+builder.Services.AddTransient<PaymentService>();
 builder.Services.AddAutoMapper(options => options.AddProfile<MappingProfiles>());
 
 // сервисы аутентификации и авторизации

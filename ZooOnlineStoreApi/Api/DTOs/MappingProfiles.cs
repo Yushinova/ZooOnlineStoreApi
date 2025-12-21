@@ -7,6 +7,7 @@ using ZooOnlineStoreApi.Model.Categories;
 using ZooOnlineStoreApi.Model.Feedbacks;
 using ZooOnlineStoreApi.Model.OrderItems;
 using ZooOnlineStoreApi.Model.Orders;
+using ZooOnlineStoreApi.Model.Payments;
 using ZooOnlineStoreApi.Model.PetTypes;
 using ZooOnlineStoreApi.Model.ProductImages;
 using ZooOnlineStoreApi.Model.Products;
@@ -42,9 +43,12 @@ namespace ZooOnlineStoreApi.Api.DTOs
             CreateMap<OrderItem, OrderItemResponse>();
             CreateMap<OrderItemRequest, OrderItem>();
             CreateMap<Order, OrderResponse>();
+            CreateMap<Order, OrderPaymentResponse>();
             CreateMap<OrderRequest, Order>();
             CreateMap<AdminRequest, Admin>();
             CreateMap<Admin, AdminResponse>();
+            CreateMap<PaymentRequest, Payment>();
+            CreateMap<Payment, PaymentResponse>();
         }
     }
  
