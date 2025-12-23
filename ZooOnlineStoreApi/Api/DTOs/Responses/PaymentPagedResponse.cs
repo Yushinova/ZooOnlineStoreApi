@@ -4,7 +4,7 @@ namespace ZooOnlineStoreApi.Api.DTOs.Responses
 {
     public class PaymentPagedResponse
     {
-        public List<Payment> Items { get; set; } = new();
+        public List<PaymentResponse> Items { get; set; } = new();
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
         public int TotalCount { get; set; }

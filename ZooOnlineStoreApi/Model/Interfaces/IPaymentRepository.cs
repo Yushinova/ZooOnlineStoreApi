@@ -10,6 +10,6 @@ namespace ZooOnlineStoreApi.Model.Interfaces
         Task<List<Payment>> SelectAllByUserIdAsync(int userId);
         Task<Payment> InsertReturnEntityAsync(Payment entity);
         Task<Payment> UpdateReturnEntityAsync(Payment entity);
-        Task<PaymentPagedResponse> SelectWithPagination(PaymentQueryParameters parameters);
+        Task<PaymentPaged> SelectWithPagination(PaymentFilter parameters);
     }
 }

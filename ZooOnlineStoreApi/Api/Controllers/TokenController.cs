@@ -32,6 +32,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
                     Path = "/"          // Доступ на всех страницах
                     // Domain = "example.com" // Если нужно на поддоменах
                 };
+               // Response.Cookies.Delete("userToken");
                 HttpContext.Response.Cookies.Append("adminToken", token, cookieOptions);
                 // 200
                 return Ok(token);
@@ -59,6 +60,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
                     Path = "/"          // Доступ на всех страницах
                     // Domain = "example.com" // Если нужно на поддоменах
                 };
+                //Response.Cookies.Delete("adminToken");
                 HttpContext.Response.Cookies.Append("userToken", token, cookieOptions);
                 // 200
                 return Ok(token);

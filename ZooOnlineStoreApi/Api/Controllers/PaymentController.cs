@@ -50,12 +50,15 @@ namespace ZooOnlineStoreApi.Api.Controllers
 
         [HttpGet("user/{userId:int}")]
         [Authorize(Roles = JwtService.USER_ROLE)]
-        public async Task<IActionResult> GetByUserIdAsync(int userId)
+        public async Task<IActionResult> GetByUserIdAsync(int userId, PaymentRequestParams parameters)
         {
             try
             {
-                List<Payment>? payments = await paymentService.SelectAllByUserIdAsync(userId);
-                return Ok(mapper.Map<List<PaymentResponse>>(payments));
+                parameters.UserId = userId;
+                PaymentPagedResponse response = await paymentService.SelectWithPagination(parameters);
+                return Ok(response);
+                //List<Payment>? payments = await paymentService.SelectAllByUserIdAsync(userId);
+                //return Ok(mapper.Map<List<PaymentResponse>>(payments));
             }
             catch (Exception ex)
             {
@@ -64,17 +67,17 @@ namespace ZooOnlineStoreApi.Api.Controllers
             }
         }
 
-        [HttpGet]//для тетов
-        [Authorize]
-        public async Task<IActionResult> ListAllAsync()
-        {
-            List<Payment> paymentsFromDb = await paymentService.SelectAllAsync();
-            return Ok(mapper.Map<List<PaymentResponse>>(paymentsFromDb));
-        }
+        //[HttpGet]//для тетов
+        //[Authorize]
+        //public async Task<IActionResult> ListAllAsync()
+        //{
+        //    List<Payment> paymentsFromDb = await paymentService.SelectAllAsync();
+        //    return Ok(mapper.Map<List<PaymentResponse>>(paymentsFromDb));
+        //}
 
-        [HttpGet("pagin")]
+        [HttpGet]
         [Authorize]
-        public async Task<IActionResult> ListWithPagination([FromBody] PaymentQueryParameters parameters)
+        public async Task<IActionResult> ListWithPagination([FromBody] PaymentRequestParams parameters)
         {
             try
             {

@@ -14,7 +14,6 @@ namespace ZooOnlineStoreApi.Api.DTOs.Responses
         public string PaymentMethod { get; set; } = string.Empty;
         public string ExternalPaymentId { get; set; } = string.Empty;//получен из платежной системы
         public string Status { get; set; } = string.Empty;//pending, succeeded, canceled
-        public int OrderId { get; set; }
         public OrderPaymentResponse Order { get; set; } = new OrderPaymentResponse();
     }
 }

@@ -11,7 +11,7 @@ namespace ZooOnlineStoreApi.Api.DTOs.Responses
         public string OrderNumber { get; set; } = string.Empty;
         public decimal ShippingCost { get; set; } = 0;
         public decimal Amount { get; set; } = 0;
-        public string Status { get; set; } = string.Empty;//Kart, Paid, Processing, Shipped, Delivered, Deleted
+        public string Status { get; set; } = string.Empty;//Pending, Paid, Processing, Shipped, Delivered, Deleted
         public DateTime CreatedAt { get; set; }
         public string ShippingAddress { get; set; } = string.Empty;
         public PaymentResponse? Payment { get; set; }
@@ -20,6 +20,7 @@ namespace ZooOnlineStoreApi.Api.DTOs.Responses
     }
     public class OrderPaymentResponse
     {
+        public int Id { get; set; }
         public string OrderNumber { get; set; } = string.Empty;
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
 using ZooOnlineStoreApi.Model.Interfaces;
@@ -20,7 +21,7 @@ namespace ZooOnlineStoreApi.Storage
 
         public async Task<Payment?> GetByIdAsync(int id)
         {
-            return await _context.Payments.Include(p=>p.Order).FirstOrDefaultAsync(p => p.Id == id);
+            return await _context.Payments.Include(p => p.Order).FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public Task InsertAsync(Payment entity)
@@ -37,7 +38,7 @@ namespace ZooOnlineStoreApi.Storage
 
         public async Task<List<Payment>> SelectAllAsync()
         {
-            return await _context.Payments.Include(p=>p.Order).ToListAsync();
+            return await _context.Payments.Include(p => p.Order).ToListAsync();
         }
 
         public async Task<List<Payment>> SelectAllByUserIdAsync(int userId)
@@ -45,11 +46,19 @@ namespace ZooOnlineStoreApi.Storage
             return await _context.Payments.Include(p => p.Order).Where(p => p.Order.UserId == userId).ToListAsync();
         }
 
-        public async Task<PaymentPagedResponse> SelectWithPagination(PaymentQueryParameters parameters)
+        public async Task<PaymentPaged> SelectWithPagination(PaymentFilter parameters)
         {
-            IQueryable<Payment> query = _context.Payments.Include(p=>p.Order).AsQueryable();
+            IQueryable<Payment> query = _context.Payments.Include(p => p.Order).AsQueryable();
+
+            if (parameters.UserId.HasValue)
+            {
+                query = query.Where(p => p.Order.UserId == parameters.UserId.Value);
+            }
             if (!string.IsNullOrEmpty(parameters.Status))
+            {
                 query = query.Where(p => p.Status == parameters.Status);
+            }
+
             query = parameters.SortBy?.ToLower() switch
             {
                 "amount" => parameters.SortDescending
@@ -63,8 +72,8 @@ namespace ZooOnlineStoreApi.Storage
             List<Payment> items = await query
                 .Skip((parameters.PageNumber - 1) * parameters.PageSize)
                 .Take(parameters.PageSize).ToListAsync();
-
-            PaymentPagedResponse response = new PaymentPagedResponse
+         
+            PaymentPaged response = new PaymentPaged
             {
                 Items = items,
                 TotalCount = totalCount,

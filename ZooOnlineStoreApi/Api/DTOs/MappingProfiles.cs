@@ -49,6 +49,8 @@ namespace ZooOnlineStoreApi.Api.DTOs
             CreateMap<Admin, AdminResponse>();
             CreateMap<PaymentRequest, Payment>();
             CreateMap<Payment, PaymentResponse>();
+            CreateMap<PaymentPaged, PaymentPagedResponse>();
+            CreateMap<PaymentRequestParams, PaymentFilter>();
         }
     }
  

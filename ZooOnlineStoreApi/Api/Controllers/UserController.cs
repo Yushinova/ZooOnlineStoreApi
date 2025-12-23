@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
+using ZooOnlineStoreApi.Api.Jwt;
 using ZooOnlineStoreApi.Model.Admins;
 using ZooOnlineStoreApi.Model.Exeptions;
 using ZooOnlineStoreApi.Model.Interfaces;
@@ -112,7 +113,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
             }
         }
         [HttpGet("{id:int}")]
-        [Authorize]
+        [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> GetByIdAsynk(int id)
         {
             try
@@ -128,7 +129,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        [Authorize]
+        [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> DeleteByIdAsync(int id)
         {
             try

@@ -118,7 +118,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
 
         [HttpGet("user/{userId:int}")]//получение всех заказов юзером
-        //[Authorize(Roles = JwtService.USER_ROLE)]
+        [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> ListAllByUserId(int userId)
         {
             try

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
 using ZooOnlineStoreApi.Model.Exeptions;
@@ -8,10 +9,12 @@ namespace ZooOnlineStoreApi.Model.Payments
 {
     public class PaymentService
     {
-        IPaymentRepository _payments { get; set; }
-        public PaymentService(IPaymentRepository payment)
+        private readonly IPaymentRepository _payments;
+        private readonly IMapper _mapper;
+        public PaymentService(IPaymentRepository payment, IMapper mapper)
         {
             _payments = payment;
+            _mapper = mapper;
         }
         public async Task<Payment?> GetByIdAsync(int id)
         {
@@ -22,9 +25,10 @@ namespace ZooOnlineStoreApi.Model.Payments
             }
             return paymentFromDb;
         }
-        public async Task<PaymentPagedResponse> SelectWithPagination(PaymentQueryParameters parameters)
+        public async Task<PaymentPagedResponse> SelectWithPagination(PaymentRequestParams parameters)
         {
-            return await _payments.SelectWithPagination(parameters);
+            PaymentFilter filter = _mapper.Map<PaymentFilter>(parameters);
+            return _mapper.Map<PaymentPagedResponse>( await _payments.SelectWithPagination(filter));
         }
         public async Task<Payment> InsertReturnEntityAsync(Payment entity)
         {
