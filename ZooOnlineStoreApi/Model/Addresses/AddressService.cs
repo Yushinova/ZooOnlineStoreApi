@@ -1,5 +1,8 @@
-﻿using System.Collections.Specialized;
+﻿using AutoMapper;
+using System.Collections.Specialized;
 using System.ComponentModel;
+using ZooOnlineStoreApi.Api.DTOs.Requests;
+using ZooOnlineStoreApi.Api.DTOs.Responses;
 using ZooOnlineStoreApi.Model.Exeptions;
 using ZooOnlineStoreApi.Model.Interfaces;
 
@@ -8,13 +11,17 @@ namespace ZooOnlineStoreApi.Model.Addresses
     public class AddressService
     {
         private readonly IAddressRepository _addressRepository;
-        public AddressService(IAddressRepository addressRepository)
+        private readonly IMapper _mapper;
+        public AddressService(IAddressRepository addressRepository, IMapper mapper)
         {
             _addressRepository = addressRepository;
+            _mapper = mapper;
         }
-        public async Task InsertAsync(Address address)
+        public async Task InsertAsync(AddressRequest request)
         {
-           await _addressRepository.InsertAsync(address);
+            Address addressInsert = _mapper.Map<Address>(request);
+            addressInsert.CreatedAt = DateTime.UtcNow;
+            await _addressRepository.InsertAsync(addressInsert);
         }
         public async Task DeleteAsync(int id)
         {
@@ -25,9 +32,11 @@ namespace ZooOnlineStoreApi.Model.Addresses
             }
             await _addressRepository.DeleteAsync(addressFromDb);
         }
-        public async Task<List<Address>?> ListAllByUserIdAsync(int id)
+        public async Task<List<AddressResponse>> ListAllByUserIdAsync(int id)
         {
-            return await _addressRepository.SelectByUserIdAsync(id);
+            List<Address>? addressesFromDb = await _addressRepository.SelectByUserIdAsync(id);
+
+            return _mapper.Map<List<AddressResponse>>(addressesFromDb);
         }
     }
 }

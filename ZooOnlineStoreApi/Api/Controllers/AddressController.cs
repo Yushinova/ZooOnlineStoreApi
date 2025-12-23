@@ -14,21 +14,18 @@ namespace ZooOnlineStoreApi.Api.Controllers
     public class AddressController : ControllerBase
     {
         private readonly AddressService addressService;
-        private readonly IMapper mapper;
-        public AddressController(AddressService addressService, IMapper mapper)
+        public AddressController(AddressService addressService)
         {
             this.addressService = addressService;
-            this.mapper = mapper;
         }
+
         [HttpPost]
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> InsertAsync([FromBody] AddressRequest request)
         {
             try
             {
-                Address addressInsert = mapper.Map<Address>(request);
-                addressInsert.CreatedAt = DateTime.UtcNow;
-                await addressService.InsertAsync(addressInsert);
+                await addressService.InsertAsync(request);
                 return Created();
             }
             catch (Exception ex)
@@ -38,13 +35,15 @@ namespace ZooOnlineStoreApi.Api.Controllers
             }
          
         }
+
         [HttpGet("{id:int}")]
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> GetByUserIdAsync(int id)
         {
-            List<Address>? adressesFromDb = await addressService.ListAllByUserIdAsync(id);
-            return Ok(mapper.Map<List<AddressResponse>>(adressesFromDb));
+            List<AddressResponse> responses = await addressService.ListAllByUserIdAsync(id);
+            return Ok(responses);
         }
+
         [HttpDelete("{id:int}")]
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> DeleteByIdAsync(int id)
