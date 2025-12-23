@@ -1,4 +1,7 @@
-﻿using ZooOnlineStoreApi.Model.Categories;
+﻿using AutoMapper;
+using ZooOnlineStoreApi.Api.DTOs.Requests;
+using ZooOnlineStoreApi.Api.DTOs.Responses;
+using ZooOnlineStoreApi.Model.Categories;
 using ZooOnlineStoreApi.Model.Exeptions;
 using ZooOnlineStoreApi.Model.Interfaces;
 
@@ -8,18 +11,26 @@ namespace ZooOnlineStoreApi.Model.PetTypes
     {
         private readonly IPetTypeRepository _petTypes;
         private readonly ICategoryRepository _category;
-        public PetTypeService(IPetTypeRepository petType, ICategoryRepository category)
+        private readonly IMapper _mapper;
+        public PetTypeService(IPetTypeRepository petType, ICategoryRepository category, IMapper mapper)
         {
             _petTypes = petType;
             _category = category;
+            _mapper = mapper;
         }
-        public async Task<List<PetType>> ListAllAsync()
+        public async Task<List<PetTypeResponse>> ListAllAsync()
         {
-            return await _petTypes.SelectAllAsync();
+            List<PetType> petTypes = await _petTypes.SelectAllAsync();
+            return _mapper.Map<List<PetTypeResponse>>(petTypes);
         }
-        public async Task<PetType?> GetNyNameAsync(string name)
+        public async Task<PetTypeResponse> GetByNameAsync(string name)
         {
-            return await _petTypes.SelectByNameAsync(name);
+            PetType? petType = await _petTypes.SelectByNameAsync(name);
+            if (petType == null)
+            {
+                throw new NotFoundException();
+            }
+            return _mapper.Map<PetTypeResponse>(petType);
         }
         public async Task InsertAsync(string name, string imageName)
         {
@@ -30,22 +41,31 @@ namespace ZooOnlineStoreApi.Model.PetTypes
                
             }
            await _petTypes.InsertAsync(new PetType { Name = name, ImageName = imageName });
+
         }
-        public async Task UpdateAsync(PetType petType)
+        public async Task UpdateAsync(PetTypeUpdate request)
         {
-            PetType? type = await _petTypes.SelectByIdWithCategories(petType.Id);
-            if (type == null)
+            PetType? petTypeUpdate = await _petTypes.SelectByIdWithCategories(request.Id);
+            if (petTypeUpdate == null)
             {
                 throw new NotFoundException();
             }
-            type.Name = petType.Name;
-            type.ImageName = petType.ImageName;
-            if (type.Categories != null)
+            if (request.CategoriesIds != null && request.CategoriesIds.Any())
             {
-                type.Categories.Clear();
+                List<Category> categoriesFromDb = await _category.SelectAllAsync();
+                petTypeUpdate.Categories = new HashSet<Category>();
+                foreach (var item in categoriesFromDb)
+                {
+                    if (request.CategoriesIds.Contains(item.Id))
+                    {
+                        petTypeUpdate.Categories.Add(item);
+                    }
+                }
             }
-            type.Categories = petType.Categories;
-            await _petTypes.UpdateAsync(type);
+            petTypeUpdate.Name = request.Name;
+            petTypeUpdate.ImageName = request.ImageName;
+         
+            await _petTypes.UpdateAsync(petTypeUpdate);
         }
         public async Task DeleteByIdAsync(int id)
         {
@@ -56,54 +76,19 @@ namespace ZooOnlineStoreApi.Model.PetTypes
             }
             await _petTypes.DeleteAsync(petTypeDeleted);
         }
-        public async Task<List<PetType>> ListAllWithCategories()
+        public async Task<List<PetTypeResponse>> ListAllWithCategories()
         {
-            return await _petTypes.SelectAllWithCategoies();
+            List<PetType> petTypes = await _petTypes.SelectAllWithCategoies();
+            return _mapper.Map<List<PetTypeResponse>>(petTypes);
         }
-        public async Task<PetType?> SelectByIdWithCategoties(int id)
+        public async Task<PetTypeResponse> SelectByIdWithCategoties(int id)
         {
-            return await _petTypes.SelectByIdWithCategories(id);
-        }
-        public async Task RemoveCategoryByIdFromPetType(int petTypeId, int categoryId)
-        {
-            //находим тип по id с категориями
-            PetType? petTypeUpdated = await _petTypes.SelectByIdWithCategories(petTypeId);
-            if (petTypeUpdated != null)
-            {
-                if (petTypeUpdated.Categories != null)
-                {
-                    Category? categoryDel = petTypeUpdated.Categories.FirstOrDefault(c => c.Id == categoryId);
-                    if (categoryDel != null)
-                    {
-                        petTypeUpdated.Categories.Remove(categoryDel);
-                        await _petTypes.UpdateAsync(petTypeUpdated);
-                    }
-                    else
-                    {
-                        throw new NotFoundException();
-                    }
-                }
-            }
-            else
+            PetType? petType = await _petTypes.SelectByIdWithCategories(id);
+            if (petType == null)
             {
                 throw new NotFoundException();
             }
-        }
-        public async Task AddCategoryToPetTypeAsync(int petTypeId, int categoryId)
-        {
-            Category? categoryInsert = await _category.GetByIdAsync(categoryId);
-            PetType? petTypeUpdated = await _petTypes.SelectByIdWithCategories(petTypeId);
-            if (categoryInsert == null || petTypeUpdated == null)
-            {
-                throw new NotFoundException();
-            }
-            petTypeUpdated.Categories ??= new HashSet<Category>();//если null инициализируем
-            if (petTypeUpdated.Categories.Any(c => c.Id == categoryId))
-            {
-                throw new DuplicationException("categoryName", categoryInsert.Name);
-            }
-            petTypeUpdated.Categories.Add(categoryInsert);
-            await _petTypes.UpdateAsync(petTypeUpdated);
+            return _mapper.Map<PetTypeResponse>(petType);
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
@@ -20,17 +19,14 @@ namespace ZooOnlineStoreApi.Api.Controllers
         private readonly ProductService productService;
         private readonly OrderItemService orderItemService;
         private readonly UserService userService;
-        private readonly IMapper mapper;
         public OrderController(OrderService orderService,
                 ProductService productService,
                 OrderItemService orderItemService,
-                IMapper mapper,
                 UserService userService)
         {
             this.orderService = orderService;
             this.productService = productService;
             this.orderItemService = orderItemService;
-            this.mapper = mapper;
             this.userService = userService;
         }
 
@@ -40,9 +36,9 @@ namespace ZooOnlineStoreApi.Api.Controllers
         public async Task<ActionResult> GetOrdersSorted([FromQuery] int page, [FromQuery] int pageSize)
         {
             Console.WriteLine("page: " + page + "size: " + pageSize);
-            List<Order>? ordersFromDb = await orderService.ListPaginationAsync(page, pageSize);
+            List<OrderResponse>? response = await orderService.ListPaginationAsync(page, pageSize);
 
-            return Ok(mapper.Map<List<OrderResponse>>(ordersFromDb));
+            return Ok(response);
         }
 
         [HttpPatch("admin/{id:int}")]
@@ -51,12 +47,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         {
             try
             {
-                Order? orderFromDb = await orderService.GetByIdAsync(id);
-                orderFromDb.Amount -= orderFromDb.ShippingCost;
-                orderFromDb.ShippingCost = request.ShippingCost;
-                orderFromDb.Status = request.Status;
-                orderFromDb.Amount += request.ShippingCost;
-                await orderService.UndateAsync(orderFromDb);
+                 OrderResponse response = await orderService.UndateAsync(id, request);
                 if (request.Status.ToLower().Contains("del"))
                 {
                     List<OrderItem>? itemsByOrderId = await orderItemService.ListAllByOrderIdAsync(id);
@@ -68,7 +59,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
                         }
                     }
                 }
-                return Ok(mapper.Map<OrderResponse>(orderFromDb));
+                return Ok(response);
             }
             catch (NotFoundException ex)
             {
@@ -88,11 +79,8 @@ namespace ZooOnlineStoreApi.Api.Controllers
         {
             try
             {
-                Order orderInsert = mapper.Map<Order>(request);
-                orderInsert.OrderNumber = GenerateGuidBasedOrderNumber();
-                orderInsert.CreatedAt = DateTime.UtcNow;
-                orderInsert = await orderService.InsertAsync(orderInsert);
-                if (orderInsert.OrderItems != null && orderInsert.OrderItems.Count > 0)
+                 OrderResponse orderInsert = await orderService.InsertAsync(request);
+                if (request.OrderItems != null && request.OrderItems.Count > 0)
                 {
                     foreach (var item in orderInsert.OrderItems)
                     {
@@ -100,14 +88,13 @@ namespace ZooOnlineStoreApi.Api.Controllers
                         await productService.DeleteQuantityByIdAsync(item.ProductId, item.Quantity);//убираем количество товара
                     }
                 }
-                Order? orderFromDb = await orderService.UndateAsync(orderInsert);
-                User? userFromDb = await userService.GetByIdAsync(orderInsert.UserId);
-                if (userFromDb != null)
+                UserResponse user = await userService.GetByIdAsync(request.UserId);
+                if (user != null)
                 {
-                    userFromDb.TotalOrders += orderInsert.Amount;
-                    await userService.UpdateAsync(userFromDb);
+                    user.TotalOrders += orderInsert.Amount;
+                    await userService.UpdateAsync(user);
                 }
-                return Ok(mapper.Map<OrderResponse>(orderFromDb));
+                return Ok(orderInsert);
             }
             catch (Exception ex)
             {
@@ -123,7 +110,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         {
             try
             {
-                List<OrderResponse> orderResponse = mapper.Map<List<OrderResponse>>(await orderService.ListAllByUserIdAsync(userId));
+                List<OrderResponse> orderResponse = await orderService.ListAllByUserIdAsync(userId);
                 return Ok(orderResponse);
             }
             catch (Exception ex)
@@ -133,15 +120,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
             }
 
         }
-        //генерация номера заказа
-        public static string GenerateGuidBasedOrderNumber()
-        {
-            var guid = Guid.NewGuid().ToString("N"); // без дефисов
-            var shortGuid = guid.Substring(0, 8).ToUpper();
-            var timestamp = DateTime.UtcNow.ToString("yyMMdd");
-
-            return $"ORD-{timestamp}-{shortGuid}";
-        }
+       
 
     }
 }

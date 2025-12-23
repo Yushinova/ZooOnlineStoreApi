@@ -15,55 +15,60 @@ namespace ZooOnlineStoreApi.Api.Controllers
 {
     [Route("api/pettype")]
     [ApiController]
-    public class PetTypeController: ControllerBase
+    public class PetTypeController : ControllerBase
     {
-        private readonly PetTypeService petTypes;
-        private readonly CategoryService categoryService;
-        private readonly IMapper mapper;
-        public PetTypeController(PetTypeService petTypes,  IMapper mapper, CategoryService categoryService)
+        private readonly PetTypeService petTypeService;
+        public PetTypeController(PetTypeService petTypeService)
         {
-            this.petTypes = petTypes;
-            this.mapper = mapper;
-            this.categoryService = categoryService;
+            this.petTypeService = petTypeService;
         }
 
         [HttpGet("categories")]
         public async Task<IActionResult> GetAllWithCategotiesAsync()
-        {   
-                List<PetType> petTypeFromDb = await petTypes.ListAllWithCategories();
-                return Ok(mapper.Map<List<PetTypeResponse>>(petTypeFromDb));
+        {
+            List<PetTypeResponse> response = await petTypeService.ListAllWithCategories();
+            return Ok(response);
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllAsync()
         {
-            List<PetType> petTypesFromDb = await petTypes.ListAllAsync();
-            return Ok(mapper.Map<List<PetTypeShortResponse>>(petTypesFromDb));
+            List<PetTypeResponse> response = await petTypeService.ListAllAsync();
+            return Ok(response);
         }
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetByIdWithCategories(int id)
         {
-            PetType? petTypeFromDb =await petTypes.SelectByIdWithCategoties(id);
-            return Ok(mapper.Map<PetTypeResponse>(petTypeFromDb));
+            try
+            {
+                PetTypeResponse response = await petTypeService.SelectByIdWithCategoties(id);
+                return Ok(response);
+            }
+            catch(NotFoundException ex)
+            {
+                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
+                return Conflict(error);
+            }
+
         }
-        
+
         [HttpPost]
         [Authorize(Roles = JwtService.ADMIN_ROLE)]
-        public async Task<IActionResult> InsertAsync(PetTypeRequest data)
+        public async Task<IActionResult> InsertAsync(PetTypeRequest request)
         {
             try
             {
-                await petTypes.InsertAsync(data.Name, data.ImageName);
-                PetType? petTypeFromDb = await petTypes.GetNyNameAsync(data.Name);
-                return Ok(mapper.Map<PetTypeResponse>(petTypeFromDb));
+                await petTypeService.InsertAsync(request.Name, request.ImageName);
+                PetTypeResponse response = await petTypeService.GetByNameAsync(request.Name);
+                return Ok(response);
             }
             catch (DuplicationException ex)
             {
                 ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
                 return Conflict(error);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
                 return BadRequest(error);
@@ -77,23 +82,9 @@ namespace ZooOnlineStoreApi.Api.Controllers
         {
             try
             {
-
-                PetType petTypeUpdate = mapper.Map<PetType>(request);
-                if (request.CategoriesIds != null && request.CategoriesIds.Any())
-                {
-                    List<Category> categoriesFromDb = await categoryService.ListAllAsync();
-                    petTypeUpdate.Categories = new HashSet<Category>();
-                    foreach (var item in categoriesFromDb)
-                    {
-                        if (request.CategoriesIds.Contains(item.Id))
-                        {
-                            petTypeUpdate.Categories.Add(item);
-                        }
-                    }
-                }
-                await petTypes.UpdateAsync(petTypeUpdate);
-                PetType? petTypeFromDb = await petTypes.SelectByIdWithCategoties(petTypeUpdate.Id);
-                return Ok(mapper.Map<PetTypeResponse>(petTypeFromDb));
+                await petTypeService.UpdateAsync(request);
+                PetTypeResponse response = await petTypeService.SelectByIdWithCategoties(request.Id);
+                return Ok(response);
 
             }
             catch (NotFoundException ex)
@@ -104,55 +95,19 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        [Authorize(Roles =JwtService.ADMIN_ROLE)]
+        [Authorize(Roles = JwtService.ADMIN_ROLE)]
         public async Task<IActionResult> DeleteAsync(int id)
         {
             try
             {
-                await petTypes.DeleteByIdAsync(id);
+                await petTypeService.DeleteByIdAsync(id);
                 return Ok();
             }
-            catch (NotFoundException ex) {
+            catch (NotFoundException ex)
+            {
                 ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
                 return NotFound(error);
 
-            }
-        }
-        //удаление категории из списка типа животного
-        [HttpDelete("{petTypeId}/categories/{categoryId}")]
-        [Authorize(Roles = JwtService.ADMIN_ROLE)]
-        public async Task<IActionResult> DeleteCategoryFromPetType(int petTypeId, int categoryId)
-        {
-            try
-            {
-               await petTypes.RemoveCategoryByIdFromPetType(petTypeId, categoryId);
-                return Ok();
-            }
-            catch(NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
-        }
-        //добавление категории в список категорий животного
-        [HttpPost("{petTypeId}/categories/{categoryId}")]
-        [Authorize(Roles = JwtService.ADMIN_ROLE)]
-        public async Task<IActionResult> AddCategoryToPetType(int petTypeId, int categoryId)
-        {
-            try
-            {
-                await petTypes.AddCategoryToPetTypeAsync(petTypeId, categoryId);
-                return Ok();
-            }
-            catch(NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
-            catch (DuplicationException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return Conflict(error);
             }
         }
     }

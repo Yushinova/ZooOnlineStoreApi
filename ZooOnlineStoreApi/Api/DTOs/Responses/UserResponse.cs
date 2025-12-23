@@ -13,7 +13,7 @@ namespace ZooOnlineStoreApi.Api.DTOs.Responses
         public int Discont { get; set; } = 0;
         public string? Email { get; set; }
         public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
-        public double TotalOrders { get; set; } = 0;
+        public decimal TotalOrders { get; set; } = 0;
     }
     public class UserOrderResponse
     {

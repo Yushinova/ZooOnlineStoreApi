@@ -1,50 +1,53 @@
-﻿using System.Text.RegularExpressions;
+﻿using AutoMapper;
+using ZooOnlineStoreApi.Api.DTOs.Requests;
+using ZooOnlineStoreApi.Api.DTOs.Responses;
 using ZooOnlineStoreApi.Model.Exeptions;
 using ZooOnlineStoreApi.Model.Interfaces;
-using ZooOnlineStoreApi.Model.Users;
-using ZooOnlineStoreApi.Storage;
 namespace ZooOnlineStoreApi.Model.Admins
 {
     public class AdminService
     {
         private readonly IAdminRepository _adminRepository;
         private readonly IEncoder _encoder;
-        public AdminService(IAdminRepository adminRepository, IEncoder encoder  )
+        private readonly IMapper _mapper;
+        public AdminService(IAdminRepository adminRepository, IEncoder encoder, IMapper mapper)
         {
             _adminRepository = adminRepository;
             _encoder = encoder;
+            _mapper = mapper;
         }
-        public async Task InsertAsync(Admin admin)
+        public async Task InsertAsync(AdminRequest request)
         {
-            Admin? adminFromDb = await _adminRepository.GetByLoginAsync(admin.Login);
+            Admin? adminFromDb = await _adminRepository.GetByLoginAsync(request.Login);
             if (adminFromDb != null)
             {
-                throw new DuplicationException("login", admin.Login);
+                throw new DuplicationException("login", request.Login);
             }
-            Admin adminInsert = new Admin
-            {
-                Login = admin.Login,
-                Password = admin.Password,
-                Name = admin.Name,
-                Role = admin.Role,
-                RegisteredAt = admin.RegisteredAt
-            };
+            Admin adminInsert = _mapper.Map<Admin>(request);
+            adminInsert.Password = _encoder.Encode(request.Password);
+            adminInsert.RegisteredAt = DateTime.UtcNow;
+
             await _adminRepository.InsertAsync(adminInsert);
         }
-        public async Task UpdateAsync(Admin admin)
+        public async Task UpdateAsync(AdminUpdateRequest request)
         {
-            Admin? adminFromDb = await _adminRepository.GetByLoginAsync(admin.Login);
+            Admin? adminFromDb = await _adminRepository.GetByLoginAsync(request.Login);
             if (adminFromDb == null)
             {
                 throw new NotFoundException();
             }
-            adminFromDb.Name=admin.Name;
-            adminFromDb.Role=admin.Role;
+            adminFromDb.Name=request.Name;
+            adminFromDb.Role=request.Role;
             await _adminRepository.UpdateAsync(adminFromDb);
         }
-        public async Task<Admin?> GetByLoginAsync(string login)
+        public async Task<AdminResponse> GetByLoginAsync(string login)
         {
-            return await _adminRepository.GetByLoginAsync(login);
+            Admin? adminFromDb = await _adminRepository.GetByLoginAsync(login);
+            if (adminFromDb == null)
+            {
+                throw new NotFoundException();
+            }
+            return _mapper.Map<AdminResponse>(adminFromDb);
         }
         public async Task DeleteAsync(Admin admin)
         {
@@ -74,7 +77,7 @@ namespace ZooOnlineStoreApi.Model.Admins
         // вход: api-ключ пользователя
         // выход: объект с информацией о пользователе
         // иключения: UserNotFoundException
-        public async Task<Admin> GetAdminAsync(string apiKey)
+        public async Task<AdminResponse> GetAdminAsync(string apiKey)
         {
             List<Admin> adminsFromDb = await _adminRepository.SelectAllAsync();
             foreach (var item in adminsFromDb)
@@ -82,7 +85,7 @@ namespace ZooOnlineStoreApi.Model.Admins
                 string generatedKey = generateApiKey(item);
                 if (generatedKey == apiKey)
                 {
-                    return item;
+                    return  _mapper.Map<AdminResponse>(item);
                 }
             }
             throw new NotFoundException();

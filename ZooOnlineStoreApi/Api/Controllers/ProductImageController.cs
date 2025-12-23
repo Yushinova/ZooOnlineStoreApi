@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
@@ -13,20 +12,18 @@ namespace ZooOnlineStoreApi.Api.Controllers
     public class ProductImageController: ControllerBase
     {
         private readonly ProductImageService productImageService;
-        private readonly IMapper mapper;
-        public ProductImageController(ProductImageService productImageService, IMapper mapper)
+        public ProductImageController(ProductImageService productImageService)
         {
             this.productImageService = productImageService;
-            this.mapper = mapper;
         }
+
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> InsertAsync([FromBody] ProductImageRequest request)
         {
             try
             {
-                ProductImage imageInsert = mapper.Map<ProductImage>(request);
-                await productImageService.InsertAsync(imageInsert);
+                await productImageService.InsertAsync(request);
                 return Ok();
             }
             catch(DuplicationException ex)
@@ -40,6 +37,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 return BadRequest(error);
             }
         }
+
         [HttpDelete]
         [Authorize]
         public async Task<IActionResult> DeleteByNameAsync([FromQuery] string name)
@@ -75,8 +73,8 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> ListAllAsync()
         {
-            List<ProductImage> imagesFromDb = await productImageService.ListAllAsync();
-            return Ok(mapper.Map<List<ProductImageResponse>>(imagesFromDb));
+            List<ProductImageResponse> response = await productImageService.ListAllAsync();
+            return Ok(response);
         }
 
     }

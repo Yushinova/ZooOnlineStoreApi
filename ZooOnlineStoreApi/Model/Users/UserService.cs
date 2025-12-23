@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity.Data;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.RegularExpressions;
+using ZooOnlineStoreApi.Api.DTOs.Requests;
+using ZooOnlineStoreApi.Api.DTOs.Responses;
 using ZooOnlineStoreApi.Model.Admins;
 using ZooOnlineStoreApi.Model.Exeptions;
 using ZooOnlineStoreApi.Model.Interfaces;
@@ -17,61 +20,58 @@ namespace ZooOnlineStoreApi.Model.Users
 
         private readonly IUserRepository _userRepository;
         private readonly IEncoder _encoder;
-        public UserService(IUserRepository userRepository, IEncoder encoder)
+        private readonly IMapper _mapper;
+        public UserService(IUserRepository userRepository, IEncoder encoder, IMapper mapper)
         {
             _userRepository = userRepository;
             _encoder = encoder;
+            _mapper = mapper;
         }
-        public async Task<string> RegisterAsync(User user)//первая регистрация
+        public async Task<string> RegisterAsync(UserRequest request)//первая регистрация
         {
+
             // валидация строк
-            if (!Regex.IsMatch(user.Phone, phonePattern))
+            if (!Regex.IsMatch(request.Phone, phonePattern))
             {
-                throw new ValidationException("phon4", "phone is invalid", user.Phone);
+                throw new ValidationException("phon4", "phone is invalid", request.Phone);
             }
-            if (!Regex.IsMatch(user.Email, emailPattern))
+            if (!Regex.IsMatch(request.Email, emailPattern))
             {
-                throw new ValidationException("email", "email is invalid", user.Email);
+                throw new ValidationException("email", "email is invalid", request.Email);
             }
 
             // проверка на дубликацию
-            bool isLoginDuplicated = await _userRepository.GetByPhoneAsync(user.Phone) != null;
+            bool isLoginDuplicated = await _userRepository.GetByPhoneAsync(request.Phone) != null;
             if (isLoginDuplicated)
             {
-                throw new DuplicationException("login", user.Phone);
+                throw new DuplicationException("login", request.Phone);
             }
-            bool isEmailDuplicated = await _userRepository.GetByEmailAsync(user.Email) != null;
+            bool isEmailDuplicated = await _userRepository.GetByEmailAsync(request.Email) != null;
             if (isEmailDuplicated)
             {
-                throw new DuplicationException("email", user.Email);
+                throw new DuplicationException("email", request.Email);
             }
-
-            // выполним регистрацию
-            User newUser = new User()
-            {
-                UUID = Guid.NewGuid(), // генерация UUID для пользователя
-                Name = user.Name,
-                Phone = user.Phone,
-                Email = user.Email,
-                Password = _encoder.Encode(user.Password),
-                RegisteredAt = DateTime.UtcNow
-            };
-            string apiKey = generateApiKey(newUser);
-            await _userRepository.InsertAsync(newUser);
+            User user = _mapper.Map<User>(request);
+            user.Password = _encoder.Encode(user.Password);
+            user.UUID = Guid.NewGuid();
+            user.RegisteredAt = DateTime.UtcNow;
+           
+            string apiKey = generateApiKey(user);
+            await _userRepository.InsertAsync(user);
             return apiKey;
         }
-        public async Task<string> LoginAsync(string login, string password)
+        public async Task<string> LoginAsync(UserLoginRequest request)
         {
-            if (!Regex.IsMatch(login, phonePattern))
+            if (!Regex.IsMatch(request.Phone, phonePattern))
             {
-                throw new ValidationException("phone", "phone is inavalid", login);
+                throw new ValidationException("phone", "phone is inavalid", request.Phone);
             }
-            User? userFromDb = await _userRepository.GetByPhoneAsync(login);
+            User? userFromDb = await _userRepository.GetByPhoneAsync(request.Phone);
             if (userFromDb == null)
             {
                 throw new UnauthorizedAccessException("user not found");
             }
-            if (!_encoder.Verify(password, userFromDb.Password))
+            if (!_encoder.Verify(request.Password, userFromDb.Password))
             {
                 throw new UnauthorizedAccessException("error password");
             }
@@ -92,16 +92,16 @@ namespace ZooOnlineStoreApi.Model.Users
             }
             await _userRepository.DeleteAsync(userFromDb);
         }
-        public async Task<User?> GetByIdAsync(int id)
+        public async Task<UserResponse> GetByIdAsync(int id)
         {
             User? userFromDb = await _userRepository.GetByIdAsync(id);
             if (userFromDb == null)
             {
                 throw new NotFoundException();
             }
-            return await _userRepository.GetByIdAsync(id);
+            return _mapper.Map<UserResponse>(userFromDb);
         }
-        public async Task UpdateAsync(User user)
+        public async Task UpdateAsync(UserResponse user)//order
         {
             User? userFromDb = await _userRepository.GetByIdAsync(user.Id);
             if (userFromDb == null)
@@ -116,14 +116,14 @@ namespace ZooOnlineStoreApi.Model.Users
         // вход: api-ключ пользователя
         // выход: объект с информацией о пользователе
         // иключения: UserNotFoundException
-        public async Task<User> GetUserAsync(string apiKey)
+        public async Task<UserResponse> GetUserAsync(string apiKey)
         {
             List<User> usersFromDb = await _userRepository.SelectAllAsync();
             foreach (var item in usersFromDb)
             {
                 if (generateApiKey(item) == apiKey)
                 {
-                    return item;
+                    return _mapper.Map<UserResponse>(item);
                 }
             }
             throw new NotFoundException();

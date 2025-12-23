@@ -1,6 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using ZooOnlineStoreApi.Api.DTOs.Requests;
+using ZooOnlineStoreApi.Api.DTOs.Responses;
 using ZooOnlineStoreApi.Model.Exeptions;
 using ZooOnlineStoreApi.Model.Interfaces;
+using ZooOnlineStoreApi.Model.Products;
 using ZooOnlineStoreApi.Storage;
 
 namespace ZooOnlineStoreApi.Model.Orders
@@ -8,58 +12,61 @@ namespace ZooOnlineStoreApi.Model.Orders
     public class OrderService
     {
         private readonly IOrderRepository _orderRepository;
-        public OrderService(IOrderRepository orderRepository)
+        private readonly IMapper _mapper;
+        public OrderService(IOrderRepository orderRepository, IMapper mapper)
         {
             _orderRepository = orderRepository;
+            _mapper = mapper;
         }
-        public async Task<Order?> GetByIdAsync(int id)
+     
+        public async Task<OrderResponse> InsertAsync(OrderRequest request)
+        {
+            Order orderInsert = _mapper.Map<Order>(request);
+            orderInsert.OrderNumber = GenerateGuidBasedOrderNumber();
+            orderInsert.CreatedAt = DateTime.UtcNow;
+            Order orderFromDb = await _orderRepository.InsertReturnEntityAsync(orderInsert);
+
+            return _mapper.Map<OrderResponse>(orderFromDb);
+        }
+        public async Task<OrderResponse> UndateAsync(int id, OrderUpdateRequest request)
         {
             Order? orderFromDb = await _orderRepository.GetByIdAsync(id);
-            return orderFromDb;
-        }
-        public async Task<Order?> GetByIdWithOrderItemsAsync(int id)
-        {
-            Order? orderFromDb = await _orderRepository.GetByIdWithItemsAsync(id);
-            return orderFromDb;
-        }
-        public async Task<Order> InsertAsync(Order entity)
-        {
-            return await _orderRepository.InsertReturnEntityAsync(entity);
-        }
-        public async Task<Order> UndateAsync(Order entity)
-        {
-            Order? orderFromDb = await _orderRepository.GetByIdAsync(entity.Id);
             if (orderFromDb == null)
             {
                 throw new NotFoundException();
             }
-            return await _orderRepository.UpdateReturnEntityAsync(orderFromDb);
+            orderFromDb.Amount -= orderFromDb.ShippingCost;
+            orderFromDb.ShippingCost = request.ShippingCost;
+            orderFromDb.Status = request.Status;
+            orderFromDb.Amount += request.ShippingCost;
+            Order orderUpdated = await _orderRepository.UpdateReturnEntityAsync(orderFromDb);
+            return _mapper.Map<OrderResponse>(orderUpdated);
         }
         public async Task<List<Order>> ListAllAsync()
         {
             return await _orderRepository.SelectAllAsync();
         }
 
-        public async Task<List<Order>?> ListAllByDataAsync(DateTime date)
+        public async Task<List<OrderResponse>> ListAllByUserIdAsync(int userId)
         {
-            return await _orderRepository.SelectAllByDataAsync(date);
+            List<Order>? ordersFromDb = await _orderRepository.SelectAllByUserIdAsync(userId);
+            return _mapper.Map<List<OrderResponse>>(ordersFromDb);
         }
-
-        public async Task<List<Order>?> ListAllByStatusAsync(string status)
-        {
-            return await _orderRepository.SelectAllByStatusAsync(status);
-        }
-
-        public async Task<List<Order>?> ListAllByUserIdAsync(int userId)
-        {
-            return await _orderRepository.SelectAllByUserIdAsync(userId);
-        }
-        public async Task<List<Order>?> ListPaginationAsync(int page, int pageSize)
+        public async Task<List<OrderResponse>?> ListPaginationAsync(int page, int pageSize)
         {
             if (page < 1) page = 1;
             int skip = (page - 1) * pageSize;
-            return await _orderRepository.GetAllWithPagination(skip, pageSize);
+            List<Order>? orders = await _orderRepository.GetAllWithPagination(skip, pageSize);
+            return _mapper.Map<List<OrderResponse>>(orders);
         }
+        //генерация номера заказа
+        public static string GenerateGuidBasedOrderNumber()
+        {
+            var guid = Guid.NewGuid().ToString("N"); // без дефисов
+            var shortGuid = guid.Substring(0, 8).ToUpper();
+            var timestamp = DateTime.UtcNow.ToString("yyMMdd");
 
+            return $"ORD-{timestamp}-{shortGuid}";
+        }
     }
 }

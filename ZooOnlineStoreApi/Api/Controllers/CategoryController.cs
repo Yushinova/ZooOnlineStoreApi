@@ -1,14 +1,10 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
 using ZooOnlineStoreApi.Api.Jwt;
 using ZooOnlineStoreApi.Model.Categories;
 using ZooOnlineStoreApi.Model.Exeptions;
-using ZooOnlineStoreApi.Model.Users;
-using ZooOnlineStoreApi.Storage;
 
 namespace ZooOnlineStoreApi.Api.Controllers
 {
@@ -16,48 +12,46 @@ namespace ZooOnlineStoreApi.Api.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private readonly CategoryService categories;
-        private readonly IMapper mapper;
+        private readonly CategoryService categoryService;
 
-        public CategoryController(CategoryService categories, IMapper mapper)
+        public CategoryController(CategoryService categoryService)
         {
-            this.categories = categories;
-            this.mapper = mapper;
+            this.categoryService = categoryService;
         }
         //
         [HttpGet]
         public async Task<IActionResult> GetAllAsync()
         {
-            List<Category> categoriesFromDb = await categories.ListAllAsync();
+            List<CategoryResponse> categories = await categoryService.ListAllAsync();
 
-            return Ok(mapper.Map<List<CategoryResponse>>(categoriesFromDb));
+            return Ok(categories);
         }
         //получить по id
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
 
-            Category? categoryFromDb = await categories.GetByIdAsync(id);
-            return Ok(mapper.Map<CategoryResponse>(categoryFromDb));
+            CategoryResponse response = await categoryService.GetByIdAsync(id);
+            return Ok(response);
         }
         //получить по id
         [HttpGet("pettype/{id:int}")]
         public async Task<IActionResult> GetByPetTypeIdAsync(int id)
         {
 
-            List<Category>? categoryFromDb = await categories.ListAllByPetTypeIdAsync(id);
-            return Ok(mapper.Map<List<CategoryResponse>>(categoryFromDb));
+            List<CategoryResponse> response = await categoryService.ListAllByPetTypeIdAsync(id);
+            return Ok(response);
         }
         //добавление
         [HttpPost]
         [Authorize(Roles = JwtService.ADMIN_ROLE)]
-        public async Task<IActionResult> InsertAsync(CategoryRequest data)
+        public async Task<IActionResult> InsertAsync(CategoryRequest request)
         {
             try
             {
-                await categories.InsertAsync(data.Name);
-                Category? categoryFromDb = await categories.GetByNameAsync(data.Name);
-                return Ok(mapper.Map<CategoryResponse>(categoryFromDb));
+                await categoryService.InsertAsync(request.Name);
+                CategoryResponse response = await categoryService.GetByNameAsync(request.Name);
+                return Ok(response);
             }
             catch (DuplicationException ex)
             {
@@ -78,7 +72,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         {
             try
             {
-                await categories.DeleteAsync(id);
+                await categoryService.DeleteAsync(id);
                 return Ok();
             }
             catch (NotFoundException ex)

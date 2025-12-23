@@ -1,15 +1,9 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity.Data;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
 using ZooOnlineStoreApi.Api.DTOs.Responses;
 using ZooOnlineStoreApi.Api.Jwt;
-using ZooOnlineStoreApi.Model.Admins;
 using ZooOnlineStoreApi.Model.Exeptions;
-using ZooOnlineStoreApi.Model.Interfaces;
-using ZooOnlineStoreApi.Model.Orders;
-using ZooOnlineStoreApi.Model.Products;
 using ZooOnlineStoreApi.Model.Users;
 
 namespace ZooOnlineStoreApi.Api.Controllers
@@ -20,11 +14,9 @@ namespace ZooOnlineStoreApi.Api.Controllers
     {
         private readonly UserService userService;
 
-        private readonly IMapper mapper;
-        public UserController(UserService userService, IMapper mapper)
+        public UserController(UserService userService)
         {
             this.userService = userService;
-            this.mapper = mapper;
 
         }
         [HttpPost("register")]
@@ -32,8 +24,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         {
             try
             {
-                User user = mapper.Map<User>(request);
-                string apiKey = await userService.RegisterAsync(user);
+                string apiKey = await userService.RegisterAsync(request);
                 return Ok(apiKey);
             }
             catch (ValidationException ex)
@@ -53,6 +44,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
             }
 
         }
+
         [HttpPost("logout")]
         public IActionResult Logout()
         {
@@ -68,12 +60,13 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 return BadRequest(error);
             }
         }
+
         [HttpPost("login")]
         public async Task<ActionResult> LoginAsync([FromBody] UserLoginRequest request)
         {
             try
             {
-                string apiKey = await userService.LoginAsync(request.Phone, request.Password);
+                string apiKey = await userService.LoginAsync(request);
                 return Ok(apiKey);
             }
             catch (ValidationException ex)
@@ -101,9 +94,9 @@ namespace ZooOnlineStoreApi.Api.Controllers
         {
             try
             {
-                User userFromDb = await userService.GetUserAsync(apiKey);
+                UserResponse response = await userService.GetUserAsync(apiKey);
                 // 200
-                return Ok(mapper.Map<UserResponse>(userFromDb));
+                return Ok(response);
             }
             catch (NotFoundException ex)
             {
@@ -112,14 +105,15 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 return NotFound(error);
             }
         }
+
         [HttpGet("{id:int}")]
         [Authorize(Roles = JwtService.USER_ROLE)]
-        public async Task<IActionResult> GetByIdAsynk(int id)
+        public async Task<IActionResult> GetByIdAsync(int id)
         {
             try
             {
-                User? userFromDb = await userService.GetByIdAsync(id);
-                return Ok(mapper.Map<UserResponse>(userFromDb));
+                UserResponse response = await userService.GetByIdAsync(id);
+                return Ok(response);
             }
             catch (NotFoundException ex)
             {

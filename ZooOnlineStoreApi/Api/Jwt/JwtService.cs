@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using ZooOnlineStoreApi.Api.DTOs.Responses;
 using ZooOnlineStoreApi.Model.Admins;
 using ZooOnlineStoreApi.Model.Exeptions;
 using ZooOnlineStoreApi.Model.Users;
@@ -95,7 +96,7 @@ namespace ZooOnlineStoreApi.Api.Jwt
         {
             try
             {
-                Admin? admin = await adminService.GetAdminAsync(apiKey);
+                AdminResponse? admin = await adminService.GetAdminAsync(apiKey);
                 List<Claim> claims = new List<Claim>()
         {
             new Claim(ClaimTypes.Name, admin.Name),
@@ -120,7 +121,7 @@ namespace ZooOnlineStoreApi.Api.Jwt
         {
             try
             {
-                User? user = await userService.GetUserAsync(apiKey);
+                UserResponse user = await userService.GetUserAsync(apiKey);
                 List<Claim> claims = new List<Claim>()
         {
             new Claim(ClaimTypes.Name, user.Name),

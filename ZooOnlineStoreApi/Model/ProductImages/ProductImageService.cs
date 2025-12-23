@@ -1,4 +1,7 @@
-﻿using ZooOnlineStoreApi.Model.Exeptions;
+﻿using AutoMapper;
+using ZooOnlineStoreApi.Api.DTOs.Requests;
+using ZooOnlineStoreApi.Api.DTOs.Responses;
+using ZooOnlineStoreApi.Model.Exeptions;
 using ZooOnlineStoreApi.Model.Interfaces;
 
 namespace ZooOnlineStoreApi.Model.ProductImages
@@ -6,18 +9,21 @@ namespace ZooOnlineStoreApi.Model.ProductImages
     public class ProductImageService
     {
         private readonly IProductImageRepository _productImages;
-        public ProductImageService(IProductImageRepository productImages)
+        private readonly IMapper _mapper;
+        public ProductImageService(IProductImageRepository productImages, IMapper mapper)
         {
             _productImages = productImages;
+            _mapper = mapper;
         }
-        public async Task InsertAsync(ProductImage image)
+        public async Task InsertAsync(ProductImageRequest request)
         {
-            ProductImage? productImageFromDb = await _productImages.GetByNameAsync(image.ImageName);
+            ProductImage? productImageFromDb = await _productImages.GetByNameAsync(request.ImageName);
             if (productImageFromDb!= null)
             {
-                throw new DuplicationException("image name", image.ImageName);
+                throw new DuplicationException("image name", request.ImageName);
             }
-            await _productImages.InsertAsync(image);
+            ProductImage imageInsert = _mapper.Map<ProductImage>(request);
+            await _productImages.InsertAsync(imageInsert);
         }
         public async Task DeleteByIdAsync(int id)
         {
@@ -37,18 +43,11 @@ namespace ZooOnlineStoreApi.Model.ProductImages
             }
             await _productImages.DeleteAsync(imageDeleted);
         }
-        public async Task<ProductImage?> GetByNameAsync(string name)
+
+        public async Task<List<ProductImageResponse>> ListAllAsync()
         {
-            ProductImage? image = await _productImages.GetByNameAsync(name);
-            if (image == null)
-            {
-                throw new NotFoundException();
-            }
-            return image;
-        }
-        public async Task<List<ProductImage>> ListAllAsync()
-        {
-            return await _productImages.SelectAllAsync();
+            List<ProductImage>? images = await _productImages.SelectAllAsync();
+            return _mapper.Map<List<ProductImageResponse>>(images);
         }
     }
 }

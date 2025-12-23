@@ -1,4 +1,6 @@
-﻿using ZooOnlineStoreApi.Model.Exeptions;
+﻿using AutoMapper;
+using ZooOnlineStoreApi.Api.DTOs.Responses;
+using ZooOnlineStoreApi.Model.Exeptions;
 using ZooOnlineStoreApi.Model.Interfaces;
 
 namespace ZooOnlineStoreApi.Model.Categories
@@ -6,22 +8,21 @@ namespace ZooOnlineStoreApi.Model.Categories
     public class CategoryService
     {
         private readonly ICategoryRepository _categories;
-        public CategoryService(ICategoryRepository categories)
+        private readonly IMapper _mapper;
+        public CategoryService(ICategoryRepository categories, IMapper mapper)
         {
             _categories = categories;
+            _mapper = mapper;
         }
-        public async Task<List<Category>> ListAllAsync()
+        public async Task<List<CategoryResponse>> ListAllAsync()
         {
-            return await _categories.SelectAllAsync();
+            List<Category> categoriesFromDb = await _categories.SelectAllAsync();
+            return _mapper.Map<List<CategoryResponse>>(categoriesFromDb);
         }
-        public async Task<List<Category>> ListAllByPetTypeIdAsync(int petTypeId)
+        public async Task<List<CategoryResponse>> ListAllByPetTypeIdAsync(int petTypeId)
         {
             List<Category> categories = await _categories.SelectAllByPetTypeIdAsync(petTypeId);
-            if (categories != null)
-            {
-                return categories;
-            }
-            throw new NotFoundException();
+            return _mapper.Map<List<CategoryResponse>>(categories);
         }
         public async Task InsertAsync(string name)
         {
@@ -33,18 +34,23 @@ namespace ZooOnlineStoreApi.Model.Categories
             }
             await _categories.InsertAsync(new Category { Name = name });
         }
-        public async Task<Category?> GetByNameAsync(string name)
+        public async Task<CategoryResponse> GetByNameAsync(string name)
         {
-            return await _categories.SelectByName(name);
+            Category? categoryFromDb = await _categories.SelectByName(name);
+            if (categoryFromDb == null)
+            {
+                throw new NotFoundException();
+            }
+            return _mapper.Map<CategoryResponse>(categoryFromDb);
         }
-        public async Task<Category?> GetByIdAsync(int id)
+        public async Task<CategoryResponse> GetByIdAsync(int id)
         {
             Category? category = await _categories.GetByIdAsync(id);
             if (category == null)
             {
                 throw new NotFoundException();
             }
-            return category;
+            return _mapper.Map<CategoryResponse>(category);
         }
         public async Task DeleteAsync(int id)
         {

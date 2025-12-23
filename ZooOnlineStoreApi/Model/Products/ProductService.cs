@@ -1,52 +1,57 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using System.Xml.Linq;
+﻿using AutoMapper;
 using ZooOnlineStoreApi.Api.DTOs.Requests;
+using ZooOnlineStoreApi.Api.DTOs.Responses;
 using ZooOnlineStoreApi.Model.Exeptions;
 using ZooOnlineStoreApi.Model.Interfaces;
 using ZooOnlineStoreApi.Model.PetTypes;
-using ZooOnlineStoreApi.Model.ProductImages;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ZooOnlineStoreApi.Model.Products
 {
     public class ProductService
     {
         private readonly IProductRepository _products;
-        private readonly IProductImageRepository _images;
         private readonly IPetTypeRepository _petTypes;
-        public ProductService(IProductRepository products, IProductImageRepository images, IPetTypeRepository petTypes)
+        private readonly IMapper _mapper;
+        public ProductService(IProductRepository products, IPetTypeRepository petTypes, IMapper mapper)
         {
             _products = products;
-            _images = images;
             _petTypes = petTypes;
+            _mapper = mapper;
         }
-        public async Task<Product> InsertAsync(Product product)
+        public async Task<ProductResponse> InsertAsync(ProductRequest request)
         {
-            return await _products.InsertAndReturnAsync(product);
+            Product newProduct = _mapper.Map<Product>(request);
+            if (request.PetTypeIds != null && request.PetTypeIds.Any())
+            {
+                List<PetType> petTypesFromDb = await _petTypes.SelectAllAsync();
+                newProduct.PetTypes ??= new HashSet<PetType>();
+                foreach (var item in petTypesFromDb)
+                {
+                    if (request.PetTypeIds.Contains(item.Id))
+                    {
+                        newProduct.PetTypes.Add(item);
+                    }
+                }
+            }
+            Product productFromDb = await _products.InsertAndReturnAsync(newProduct);
+            return _mapper.Map<ProductResponse>(productFromDb);
         }
-        public async Task<List<Product>?> SuperPagination(ProductQueryParameters parameters)
+        public async Task<List<ProductResponse>> SuperPagination(ProductQueryParameters parameters)
         {
             if (parameters.Page < 1) parameters.Page = 1;
             if (parameters.PageSize < 1) parameters.PageSize = 10;
-            return await _products.SelectAllWithFilters(parameters);
+            List<Product>? products = await _products.SelectAllWithFilters(parameters);
+            return _mapper.Map<List<ProductResponse>>(products);
         }
-        public async Task<Product?> SelectByIdWithAllInfoAsync(int id)
+        public async Task<ProductResponse> SelectByIdWithAllInfoAsync(int id)
         {
-            return await _products.SelectByIdWithAllInfo(id);
-        }
-        public async Task<Product?> SelectByIdAsync(int id)
-        {
-            Product? productFromDb = await _products.GetByIdAsync(id);
-            if (productFromDb == null)
+            Product? product = await _products.SelectByIdWithAllInfo(id);
+            if (product == null)
             {
                 throw new NotFoundException();
             }
-            return productFromDb;
-        }
-        public async Task<List<Product>> ListAllAsync()
-        {
-            return await _products.SelectAllAsync();
+            return _mapper.Map<ProductResponse>(product);
+
         }
         public async Task DeleteQuantityByIdAsync(int id, int quantity)
         {
@@ -71,65 +76,40 @@ namespace ZooOnlineStoreApi.Model.Products
             }
 
         }
-        public async Task UpdateRatingAsync(int productId, double newRating)
+     
+        public async Task<ProductResponse> UpdateAsync(int id, ProductRequest request)
         {
-            var product = await _products.GetByIdAsync(productId);
-            if (product == null) return;
-
-            product.Rating = newRating;
-            await _products.UpdateAsync(product);
-        }
-        public async Task UpdateAsync(Product product)
-        {
-            Product? productFromDb = await _products.SelectByIdWithAllInfo(product.Id);
+            Product? productFromDb = await _products.SelectByIdWithAllInfo(id);
             if (productFromDb == null)
             {
                 throw new NotFoundException();
             }
-            productFromDb.Name = product.Name;
-            productFromDb.Brand = product.Brand;
-            productFromDb.Rating = product.Rating;
-            productFromDb.Description = product.Description;
-            productFromDb.CostPrice = product.CostPrice;
-            productFromDb.Price = product.Price;
-            productFromDb.Quantity = product.Quantity;
-            productFromDb.isPromotion = product.isPromotion;
-            productFromDb.isActive = product.isActive;
-            productFromDb.CategoryId = product.CategoryId;
-            if (productFromDb.PetTypes != null)
+            productFromDb.Name = request.Name;
+            productFromDb.Brand = request.Brand;
+            productFromDb.Rating = request.Rating;
+            productFromDb.Description = request.Description;
+            productFromDb.CostPrice = request.CostPrice;
+            productFromDb.Price = request.Price;
+            productFromDb.Quantity = request.Quantity;
+            productFromDb.isPromotion = request.isPromotion;
+            productFromDb.isActive = request.isActive;
+            productFromDb.CategoryId = request.CategoryId;
+            if (request.PetTypeIds != null && request.PetTypeIds.Any())
             {
-                productFromDb.PetTypes.Clear();
+                List<PetType> petTypesFromDb = await _petTypes.SelectAllAsync();
+                productFromDb.PetTypes = new HashSet<PetType>();
+                foreach (var item in petTypesFromDb)
+                {
+                    if (request.PetTypeIds.Contains(item.Id))
+                    {
+                        productFromDb.PetTypes.Add(item);
+                    }
+                }
             }
-            productFromDb.PetTypes = product.PetTypes;
             await _products.UpdateAsync(productFromDb);
+            return _mapper.Map<ProductResponse>(productFromDb);
         }
-        public async Task AddPetTypeAsync(int productId, int petTypeId)
-        {
-            Product? productFromDb = await _products.SelectByIdWithAllInfo(productId);
-            PetType? petType = await _petTypes.GetByIdAsync(petTypeId);
-            if (productFromDb == null || petType == null)
-            {
-                throw new NotFoundException();
-            }
-            productFromDb.PetTypes ??= new HashSet<PetType>();
-            if (productFromDb.PetTypes.Any(p => p.Name == petType.Name))
-            {
-                throw new DuplicationException("pet type", petType.Name);
-            }
-            productFromDb.PetTypes.Add(petType);
-            await _products.UpdateAsync(productFromDb);
-        }
-        public async Task DeletePetTypeFromProductAsync(int productId, int petTypeId)
-        {
-            Product? productFromDb = await _products.SelectByIdWithAllInfo(productId);
-            PetType? petType = await _petTypes.GetByIdAsync(petTypeId);
-            if (productFromDb == null || petType == null || productFromDb.PetTypes == null)
-            {
-                throw new NotFoundException();
-            }
-            productFromDb.PetTypes.Remove(petType);
-            await _products.UpdateAsync(productFromDb);
-        }
+
         public async Task DeleteAsync(int id)
         {
             Product? productFromDb = await _products.GetByIdAsync(id);
