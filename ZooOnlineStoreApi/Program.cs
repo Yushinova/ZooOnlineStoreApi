@@ -1,20 +1,10 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using ZooOnlineStoreApi.Api.DTOs;
 using ZooOnlineStoreApi.Api.Jwt;
 using ZooOnlineStoreApi.Api.Middeleware;
 using ZooOnlineStoreApi.Crypto;
-using ZooOnlineStoreApi.Model.Addresses;
-using ZooOnlineStoreApi.Model.Admins;
-using ZooOnlineStoreApi.Model.Categories;
-using ZooOnlineStoreApi.Model.Feedbacks;
-using ZooOnlineStoreApi.Model.Interfaces;
-using ZooOnlineStoreApi.Model.OrderItems;
-using ZooOnlineStoreApi.Model.Orders;
-using ZooOnlineStoreApi.Model.Payments;
-using ZooOnlineStoreApi.Model.PetTypes;
-using ZooOnlineStoreApi.Model.ProductImages;
-using ZooOnlineStoreApi.Model.Products;
-using ZooOnlineStoreApi.Model.Users;
+using ZooOnlineStoreApi.Services;
+using ZooOnlineStoreApi.Services.DTOs;
+using ZooOnlineStoreApi.Services.Interfaces;
 using ZooOnlineStoreApi.Storage;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";

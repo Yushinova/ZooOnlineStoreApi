@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
-using ZooOnlineStoreApi.Model.Interfaces;
+using ZooOnlineStoreApi.Services.Interfaces;
 
 namespace ZooOnlineStoreApi.Crypto
 {

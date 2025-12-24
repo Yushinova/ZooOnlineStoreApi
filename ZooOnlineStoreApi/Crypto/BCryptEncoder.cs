@@ -1,4 +1,4 @@
-﻿using ZooOnlineStoreApi.Model.Interfaces;
+﻿using ZooOnlineStoreApi.Services.Interfaces;
 
 namespace ZooOnlineStoreApi.Crypto
 {

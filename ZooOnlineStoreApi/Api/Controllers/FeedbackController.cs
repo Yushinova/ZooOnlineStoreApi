@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ZooOnlineStoreApi.Api.DTOs.Requests;
-using ZooOnlineStoreApi.Api.DTOs.Responses;
 using ZooOnlineStoreApi.Api.Jwt;
-using ZooOnlineStoreApi.Model.Feedbacks;
+using ZooOnlineStoreApi.Services;
+using ZooOnlineStoreApi.Services.DTOs.Requests;
+using ZooOnlineStoreApi.Services.DTOs.Responses;
 
 namespace ZooOnlineStoreApi.Api.Controllers
 {

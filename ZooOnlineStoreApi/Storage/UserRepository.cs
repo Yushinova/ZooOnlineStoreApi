@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Numerics;
-using ZooOnlineStoreApi.Model.Interfaces;
-using ZooOnlineStoreApi.Model.Users;
+using ZooOnlineStoreApi.Models;
+using ZooOnlineStoreApi.Services.Interfaces;
 
 namespace ZooOnlineStoreApi.Storage
 {

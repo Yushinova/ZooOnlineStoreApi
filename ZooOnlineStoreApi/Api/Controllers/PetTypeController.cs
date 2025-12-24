@@ -3,13 +3,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
-using ZooOnlineStoreApi.Api.DTOs.Requests;
-using ZooOnlineStoreApi.Api.DTOs.Responses;
 using ZooOnlineStoreApi.Api.Jwt;
-using ZooOnlineStoreApi.Model.Categories;
-using ZooOnlineStoreApi.Model.Exeptions;
-using ZooOnlineStoreApi.Model.PetTypes;
-using ZooOnlineStoreApi.Model.Products;
+using ZooOnlineStoreApi.Services;
+using ZooOnlineStoreApi.Services.DTOs.Requests;
+using ZooOnlineStoreApi.Services.DTOs.Responses;
+using ZooOnlineStoreApi.Services.Exeptions;
 
 namespace ZooOnlineStoreApi.Api.Controllers
 {

@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ZooOnlineStoreApi.Model.Feedbacks;
-using ZooOnlineStoreApi.Model.Interfaces;
-using ZooOnlineStoreApi.Model.Products;
+using ZooOnlineStoreApi.Models;
+using ZooOnlineStoreApi.Services.Interfaces;
 
 namespace ZooOnlineStoreApi.Storage
 {

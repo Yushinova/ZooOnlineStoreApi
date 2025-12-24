@@ -1,16 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-
-using ZooOnlineStoreApi.Model.Addresses;
-using ZooOnlineStoreApi.Model.Admins;
-using ZooOnlineStoreApi.Model.Categories;
-using ZooOnlineStoreApi.Model.Feedbacks;
-using ZooOnlineStoreApi.Model.OrderItems;
-using ZooOnlineStoreApi.Model.Orders;
-using ZooOnlineStoreApi.Model.Payments;
-using ZooOnlineStoreApi.Model.PetTypes;
-using ZooOnlineStoreApi.Model.ProductImages;
-using ZooOnlineStoreApi.Model.Products;
-using ZooOnlineStoreApi.Model.Users;
+using ZooOnlineStoreApi.Models;
 
 namespace ZooOnlineStoreApi.Storage
 {

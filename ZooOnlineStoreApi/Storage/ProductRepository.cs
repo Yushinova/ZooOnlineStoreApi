@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using ZooOnlineStoreApi.Api.DTOs.Requests;
-using ZooOnlineStoreApi.Model.Interfaces;
-using ZooOnlineStoreApi.Model.Products;
+using ZooOnlineStoreApi.Models;
+using ZooOnlineStoreApi.Services.DTOs.Requests;
+using ZooOnlineStoreApi.Services.Interfaces;
 
 namespace ZooOnlineStoreApi.Storage
 {

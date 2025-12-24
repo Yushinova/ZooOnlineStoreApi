@@ -3,10 +3,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using ZooOnlineStoreApi.Api.DTOs.Responses;
-using ZooOnlineStoreApi.Model.Admins;
-using ZooOnlineStoreApi.Model.Exeptions;
-using ZooOnlineStoreApi.Model.Users;
+using ZooOnlineStoreApi.Services;
+using ZooOnlineStoreApi.Services.DTOs.Responses;
+using ZooOnlineStoreApi.Services.Exeptions;
 
 namespace ZooOnlineStoreApi.Api.Jwt
 {
