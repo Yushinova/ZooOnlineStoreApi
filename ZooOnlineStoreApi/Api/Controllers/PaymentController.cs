@@ -57,8 +57,6 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 parameters.UserId = userId;
                 PaymentPagedResponse response = await paymentService.SelectWithPagination(parameters);
                 return Ok(response);
-                //List<Payment>? payments = await paymentService.SelectAllByUserIdAsync(userId);
-                //return Ok(mapper.Map<List<PaymentResponse>>(payments));
             }
             catch (Exception ex)
             {
@@ -66,14 +64,6 @@ namespace ZooOnlineStoreApi.Api.Controllers
                 return BadRequest(error);
             }
         }
-
-        //[HttpGet]//для тетов
-        //[Authorize]
-        //public async Task<IActionResult> ListAllAsync()
-        //{
-        //    List<Payment> paymentsFromDb = await paymentService.SelectAllAsync();
-        //    return Ok(mapper.Map<List<PaymentResponse>>(paymentsFromDb));
-        //}
 
         [HttpGet]
         [Authorize]
