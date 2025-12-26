@@ -40,26 +40,24 @@ namespace ZooOnlineStoreApi.Api.Controllers
         {
             try
             {
-                // Получаем int userId из токена
                 var userId = User.FindFirst("userId")?.Value;
 
                 if (string.IsNullOrEmpty(userId))
                 {
                     return Unauthorized(new StringMessage("User ID not found in token"));
                 }
+
                 int id = int.Parse(userId);
-                // ⭐ Ищем отзыв с int userId
                 FeedbackResponse existingReview = await feedbackService.GetByUserIdAndProductIdAsync(id, productId);
 
-                if (existingReview != null) {
-                    return Ok(existingReview);
+                if (existingReview != null)
+                {
+                    return Ok(existingReview); //отзыв найден
                 }
-
                 else
                 {
-                    return Ok(new StringMessage("Feedback exist with product: "+productId));
+                    return Ok(new StringMessage($"No feedback found for product {productId}"));
                 }
-
             }
             catch (Exception ex)
             {

@@ -20,7 +20,11 @@ namespace ZooOnlineStoreApi.Services
         }
         public async Task<FeedbackResponse> InsertAsync(FeedbackRequest request)
         {
-
+            Feedback? existing = await _feedbackRepository.SelectByUserIdAndProductId(request.UserId, request.ProductId);
+            if (existing != null)
+            {
+                throw new Exception($"the user: {request.UserId} has already left a review for product: {request.ProductId}");
+            }
             Feedback feedbackInsert = _mapper.Map<Feedback>(request);
             feedbackInsert.CreatedAt = DateTime.UtcNow;
             Feedback? newFeedback = await _feedbackRepository.InsertAndRerunAsync(feedbackInsert);

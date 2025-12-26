@@ -30,17 +30,6 @@ namespace ZooOnlineStoreApi.Services
 
             await _adminRepository.InsertAsync(adminInsert);
         }
-        public async Task UpdateAsync(AdminUpdateRequest request)
-        {
-            Admin? adminFromDb = await _adminRepository.GetByLoginAsync(request.Login);
-            if (adminFromDb == null)
-            {
-                throw new NotFoundException();
-            }
-            adminFromDb.Name=request.Name;
-            adminFromDb.Role=request.Role;
-            await _adminRepository.UpdateAsync(adminFromDb);
-        }
         public async Task<AdminResponse> GetByLoginAsync(string login)
         {
             Admin? adminFromDb = await _adminRepository.GetByLoginAsync(login);
@@ -49,15 +38,6 @@ namespace ZooOnlineStoreApi.Services
                 throw new NotFoundException();
             }
             return _mapper.Map<AdminResponse>(adminFromDb);
-        }
-        public async Task DeleteAsync(Admin admin)
-        {
-            Admin? adminFromDb = await _adminRepository.GetByLoginAsync(admin.Login);
-            if (adminFromDb == null)
-            {
-                throw new NotFoundException();
-            }
-            await _adminRepository.DeleteAsync(admin);
         }
         public async Task<string> AuthenticateAsync(string login, string password)
         {
@@ -73,11 +53,6 @@ namespace ZooOnlineStoreApi.Services
             }
             return generateApiKey(adminFromDb);
         }
-
-        // GetUserAsync - получение данных о пользователе по ключу
-        // вход: api-ключ пользователя
-        // выход: объект с информацией о пользователе
-        // иключения: UserNotFoundException
         public async Task<AdminResponse> GetAdminAsync(string apiKey)
         {
             List<Admin> adminsFromDb = await _adminRepository.SelectAllAsync();
@@ -86,12 +61,31 @@ namespace ZooOnlineStoreApi.Services
                 string generatedKey = generateApiKey(item);
                 if (generatedKey == apiKey)
                 {
-                    return  _mapper.Map<AdminResponse>(item);
+                    return _mapper.Map<AdminResponse>(item);
                 }
             }
             throw new NotFoundException();
         }
-
+        public async Task UpdateAsync(AdminUpdateRequest request)
+        {
+            Admin? adminFromDb = await _adminRepository.GetByLoginAsync(request.Login);
+            if (adminFromDb == null)
+            {
+                throw new NotFoundException();
+            }
+            adminFromDb.Name = request.Name;
+            adminFromDb.Role = request.Role;
+            await _adminRepository.UpdateAsync(adminFromDb);
+        }
+        public async Task DeleteAsync(Admin admin)
+        {
+            Admin? adminFromDb = await _adminRepository.GetByLoginAsync(admin.Login);
+            if (adminFromDb == null)
+            {
+                throw new NotFoundException();
+            }
+            await _adminRepository.DeleteAsync(admin);
+        }
         private string generateApiKey(Admin admin)
         {
             return _encoder.Encode($"{admin.Name} - {admin.Login} - {admin.RegisteredAt}");

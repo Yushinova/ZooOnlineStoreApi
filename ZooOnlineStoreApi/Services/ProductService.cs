@@ -4,6 +4,8 @@ using ZooOnlineStoreApi.Models;
 using ZooOnlineStoreApi.Services.Interfaces;
 using ZooOnlineStoreApi.Services.DTOs.Requests;
 using ZooOnlineStoreApi.Services.DTOs.Responses;
+using ZooOnlineStoreApi.Services.QueryBuilders;
+using Microsoft.EntityFrameworkCore;
 
 namespace ZooOnlineStoreApi.Services
 {
@@ -40,8 +42,12 @@ namespace ZooOnlineStoreApi.Services
         {
             if (parameters.Page < 1) parameters.Page = 1;
             if (parameters.PageSize < 1) parameters.PageSize = 10;
-            List<Product>? products = await _products.SelectAllWithFilters(parameters);
-            return _mapper.Map<List<ProductResponse>>(products);
+            IQueryable<Product> query = _products.SelectAllWithImagesAndPetTypesAsync();
+            query = ProductQueryBuilder.BuildQuery(query, parameters);
+            int skip = (parameters.Page - 1) * parameters.PageSize;
+            //pagination
+            List<Product> productsSorted = await query.Skip(skip).Take(parameters.PageSize).ToListAsync();
+            return _mapper.Map<List<ProductResponse>>(productsSorted);
         }
         public async Task<ProductResponse> SelectByIdWithAllInfoAsync(int id)
         {
@@ -62,6 +68,10 @@ namespace ZooOnlineStoreApi.Services
                 {
                     productFromDb.Quantity -= quantity;
                 }
+                if (productFromDb.Quantity <= 0)
+                {
+                    productFromDb.isActive = false;
+                }
                 await _products.UpdateAsync(productFromDb);
             }
 
@@ -72,11 +82,11 @@ namespace ZooOnlineStoreApi.Services
             if (productFromDb != null)
             {
                 productFromDb.Quantity += quantity;
+                productFromDb.isActive = true;
                 await _products.UpdateAsync(productFromDb);
             }
 
         }
-     
         public async Task<ProductResponse> UpdateAsync(int id, ProductRequest request)
         {
             Product? productFromDb = await _products.SelectByIdWithAllInfo(id);

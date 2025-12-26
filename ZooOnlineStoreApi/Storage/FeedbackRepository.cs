@@ -26,7 +26,8 @@ namespace ZooOnlineStoreApi.Storage
         {
             await _context.AddAsync(entity);
             await _context.SaveChangesAsync();
-            Feedback? feedbackWithUser = await _context.Feedbacks.Include(f => f.User).FirstOrDefaultAsync(f => f.Id == entity.Id);
+            Feedback? feedbackWithUser = await _context.Feedbacks.Include(f => f.User)
+                .FirstOrDefaultAsync(f => f.Id == entity.Id);
             return feedbackWithUser;
         }
 

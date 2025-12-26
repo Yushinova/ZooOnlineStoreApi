@@ -58,9 +58,9 @@ builder.Services.AddAuthorization();
 builder.Services.AddTransient<JwtService>();
 var app = builder.Build();
 app.UseRouting();
+app.UseMiddleware<ErrorMiddleware>();
 app.UseCors(MyAllowSpecificOrigins);
 app.MapControllers();
-app.UseMiddleware<ErrorMiddleware>();
 // добавить middleware аутентификации и авторизации
 app.UseAuthentication();
 app.UseAuthorization();

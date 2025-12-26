@@ -8,7 +8,7 @@ namespace ZooOnlineStoreApi.Models
         public string OrderNumber { get; set; } = string.Empty;
         public decimal ShippingCost { get; set; } = 0;
         public decimal Amount { get; set; } = 0;
-        public string Status { get; set; } = string.Empty;//Pending, Paid, Processing, Shipped, Delivered, Deleted
+        public string Status { get; set; } = string.Empty;//pending, paid, processing, shipped, delivered, deleted
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string ShippingAddress { get; set; } = string.Empty;
         //связи 
