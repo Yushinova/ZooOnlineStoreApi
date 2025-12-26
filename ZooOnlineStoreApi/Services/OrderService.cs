@@ -33,7 +33,7 @@ namespace ZooOnlineStoreApi.Services
             Order? orderFromDb = await _orderRepository.GetByIdAsync(id);
             if (orderFromDb == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("order not found");
             }
             orderFromDb.Amount -= orderFromDb.ShippingCost;
             orderFromDb.ShippingCost = request.ShippingCost;

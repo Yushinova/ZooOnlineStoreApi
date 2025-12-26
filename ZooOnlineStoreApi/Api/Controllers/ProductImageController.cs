@@ -9,7 +9,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
 {
     [Route("api/image")]
     [ApiController]
-    public class ProductImageController: ControllerBase
+    public class ProductImageController : ControllerBase
     {
         private readonly ProductImageService productImageService;
         public ProductImageController(ProductImageService productImageService)
@@ -21,37 +21,16 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [Authorize]
         public async Task<IActionResult> InsertAsync([FromBody] ProductImageRequest request)
         {
-            try
-            {
-                await productImageService.InsertAsync(request);
-                return Ok();
-            }
-            catch(DuplicationException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
-            catch(Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
+            await productImageService.InsertAsync(request);
+            return Ok();
         }
 
         [HttpDelete]
         [Authorize]
         public async Task<IActionResult> DeleteByNameAsync([FromQuery] string name)
         {
-            try
-            {
-                await productImageService.DeleteByNameAsync(name);
-                return Ok();
-            }
-            catch (NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
+            await productImageService.DeleteByNameAsync(name);
+            return Ok();
         }
 
         /////пока не использую
@@ -59,16 +38,8 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteByIdAsync(int id)
         {
-            try
-            {
-                await productImageService.DeleteByIdAsync(id);
-                return Ok();
-            }
-            catch(NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
+            await productImageService.DeleteByIdAsync(id);
+            return Ok();
         }
         [HttpGet]
         public async Task<IActionResult> ListAllAsync()

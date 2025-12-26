@@ -16,96 +16,45 @@ namespace ZooOnlineStoreApi.Api.Controllers
         {
             this.adminService = adminService;
         }
-      
+
         //регистрация авторизация
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync([FromBody] AdminRequest request)
         {
-            try
-            {
-                await adminService.InsertAsync(request);
-                string apiKey =  await adminService.AuthenticateAsync(request.Login, request.Password);
-                return Ok(apiKey);
-            }
-            catch (DuplicationException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return Conflict(error);
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
+
+            await adminService.InsertAsync(request);
+            string apiKey = await adminService.AuthenticateAsync(request.Login, request.Password);
+            return Ok(apiKey);
 
         }
         [HttpPost("logout")]
         public IActionResult Logout()
         {
-            try
-            {
-                HttpContext.Response.Cookies.Delete("adminToken");
 
-                return Ok(new { message = "Logged out successfully" });
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
+            HttpContext.Response.Cookies.Delete("adminToken");
+            return Ok(new { message = "Logged out successfully" });
         }
         [HttpPost("login")]
         public async Task<ActionResult> LoginAsync([FromBody] AdminLoginRequest request)
         {
-            try
-            {
-                string apiKey = await adminService.AuthenticateAsync(request.Login, request.Password); 
-                return Ok(apiKey);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
+            string apiKey = await adminService.AuthenticateAsync(request.Login, request.Password);
+            return Ok(apiKey);
         }
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetInfoAsync([FromHeader(Name = "X-Api-Key")] string apiKey)
         {
-            try
-            {
-                AdminResponse admin = await adminService.GetAdminAsync(apiKey);
-                // 200
-                return Ok(admin);
-            }
-            catch (NotFoundException ex)
-            {
-                // 404
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
+            AdminResponse admin = await adminService.GetAdminAsync(apiKey);
+            // 200
+            return Ok(admin);
         }
         //мой служебный метод пока что
         [HttpPatch]
         public async Task<IActionResult> UpdateAsync([FromBody] AdminUpdateRequest request)
         {
-            try
-            {
-                await adminService.UpdateAsync(request);
-                AdminResponse response = await adminService.GetByLoginAsync(request.Login);
-                return Ok(response);
-
-            }
-            catch(NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
-            catch(Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
+            await adminService.UpdateAsync(request);
+            AdminResponse response = await adminService.GetByLoginAsync(request.Login);
+            return Ok(response);
         }
     }
 }

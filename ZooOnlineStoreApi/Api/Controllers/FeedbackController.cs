@@ -21,48 +21,31 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> AddNewFeedbackAsync([FromBody] FeedbackRequest request)
         {
-            try
-            {
-                FeedbackResponse response = await feedbackService.InsertAsync(request);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
-
+            FeedbackResponse response = await feedbackService.InsertAsync(request);
+            return Ok(response);
         }
 
         [HttpGet("check/{productId}")]
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> CheckUserFeedbackAsync(int productId)
         {
-            try
+            var userId = User.FindFirst("userId")?.Value;
+
+            if (string.IsNullOrEmpty(userId))
             {
-                var userId = User.FindFirst("userId")?.Value;
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized(new StringMessage("User ID not found in token"));
-                }
-
-                int id = int.Parse(userId);
-                FeedbackResponse existingReview = await feedbackService.GetByUserIdAndProductIdAsync(id, productId);
-
-                if (existingReview != null)
-                {
-                    return Ok(existingReview); //отзыв найден
-                }
-                else
-                {
-                    return Ok(new StringMessage($"No feedback found for product {productId}"));
-                }
+                return Unauthorized(new StringMessage("User ID not found in token"));
             }
-            catch (Exception ex)
+
+            int id = int.Parse(userId);
+            FeedbackResponse existingReview = await feedbackService.GetByUserIdAndProductIdAsync(id, productId);
+
+            if (existingReview != null)
             {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
+                return Ok(existingReview); //отзыв найден
+            }
+            else
+            {
+                return Ok(new StringMessage($"No feedback found for product {productId}"));
             }
         }
 
@@ -74,7 +57,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         }
 
         [HttpGet("product/top/{productId:int}")]
-        public async Task<IActionResult> GetTopByProductIdAsync([FromQuery] int page, [FromQuery] int pageSize, int productId )
+        public async Task<IActionResult> GetTopByProductIdAsync([FromQuery] int page, [FromQuery] int pageSize, int productId)
         {
             List<FeedbackResponse> response = await feedbackService.GetAllByProductIdWithPaginationAsync(productId, page, pageSize);
             return Ok(response);

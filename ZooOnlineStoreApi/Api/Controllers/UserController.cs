@@ -22,63 +22,22 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync([FromBody] UserRequest request)
         {
-            try
-            {
-                string apiKey = await userService.RegisterAsync(request);
-                return Ok(apiKey);
-            }
-            catch (ValidationException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
-            catch (DuplicationException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return Conflict(error);
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
-
+            string apiKey = await userService.RegisterAsync(request);
+            return Ok(apiKey);
         }
 
         [HttpPost("logout")]
         public IActionResult Logout()
         {
-            try
-            {
-               HttpContext.Response.Cookies.Delete("userToken");
-
-               return Ok(new { message = "Logged out successfully" });
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
+            HttpContext.Response.Cookies.Delete("userToken");
+            return Ok(new { message = "Logged out successfully" });
         }
 
         [HttpPost("login")]
         public async Task<ActionResult> LoginAsync([FromBody] UserLoginRequest request)
         {
-            try
-            {
-                string apiKey = await userService.LoginAsync(request);
-                return Ok(apiKey);
-            }
-            catch (ValidationException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
+            string apiKey = await userService.LoginAsync(request);
+            return Ok(apiKey);
         }
 
         //[HttpGet]//test
@@ -92,50 +51,27 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [Authorize]
         public async Task<IActionResult> GetInfoAsync([FromHeader(Name = "X-Api-Key")] string apiKey)
         {
-            try
-            {
-                UserResponse response = await userService.GetUserAsync(apiKey);
-                // 200
-                return Ok(response);
-            }
-            catch (NotFoundException ex)
-            {
-                // 404
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
+
+            UserResponse response = await userService.GetUserAsync(apiKey);
+            // 200
+            return Ok(response);
+
         }
 
         [HttpGet("{id:int}")]
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            try
-            {
-                UserResponse response = await userService.GetByIdAsync(id);
-                return Ok(response);
-            }
-            catch (NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
+            UserResponse response = await userService.GetByIdAsync(id);
+            return Ok(response);
         }
 
         [HttpDelete("{id:int}")]
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> DeleteByIdAsync(int id)
         {
-            try
-            {
-                await userService.DeleteByIdAsync(id);
-                return NoContent();
-            }
-            catch (NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
+            await userService.DeleteByIdAsync(id);
+            return NoContent();
         }
 
     }

@@ -28,7 +28,7 @@ namespace ZooOnlineStoreApi.Services
             PetType? petType = await _petTypes.SelectByNameAsync(name);
             if (petType == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("pet type not found");
             }
             return _mapper.Map<PetTypeResponse>(petType);
         }
@@ -48,7 +48,7 @@ namespace ZooOnlineStoreApi.Services
             PetType? petTypeUpdate = await _petTypes.SelectByIdWithCategories(request.Id);
             if (petTypeUpdate == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("pet type not found");
             }
             if (request.CategoriesIds != null && request.CategoriesIds.Any())
             {
@@ -72,7 +72,7 @@ namespace ZooOnlineStoreApi.Services
             PetType? petTypeDeleted = await _petTypes.GetByIdAsync(id);
             if (petTypeDeleted == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("pet type not found");
             }
             await _petTypes.DeleteAsync(petTypeDeleted);
         }
@@ -86,7 +86,7 @@ namespace ZooOnlineStoreApi.Services
             PetType? petType = await _petTypes.SelectByIdWithCategories(id);
             if (petType == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("pet type not found");
             }
             return _mapper.Map<PetTypeResponse>(petType);
         }

@@ -29,16 +29,8 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetByIdWithAllInfoAsync(int id)
         {
-            try
-            {
-                ProductResponse response = await productService.SelectByIdWithAllInfoAsync(id);
-                return Ok(response);
-            }
-            catch (NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
+            ProductResponse response = await productService.SelectByIdWithAllInfoAsync(id);
+            return Ok(response);
         }
 
         //работа с продуктами (только роль админ)
@@ -46,16 +38,8 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [Authorize(Roles = JwtService.ADMIN_ROLE)]
         public async Task<ActionResult> InsertProductAsync([FromBody] ProductRequest request)
         {
-            try
-            {
-                ProductResponse response = await productService.InsertAsync(request);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
+            ProductResponse response = await productService.InsertAsync(request);
+            return Ok(response);
 
         }
 
@@ -63,36 +47,15 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [Authorize(Roles = JwtService.ADMIN_ROLE)]
         public async Task<IActionResult> UpdateByIdAsync(int id, [FromBody] ProductRequest request)
         {
-            try
-            {
-                ProductResponse response = await productService.UpdateAsync(id, request);
-                return Ok(response);
-            }
-            catch (NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
+            ProductResponse response = await productService.UpdateAsync(id, request);
+            return Ok(response);
         }
         [HttpDelete("admin/{id:int}")]
         [Authorize(Roles = JwtService.ADMIN_ROLE)]
         public async Task<IActionResult> DeleteByIdAsync(int id)
         {
-            try
-            {
-                await productService.DeleteAsync(id);
-                return Ok();
-            }
-            catch (NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
+            await productService.DeleteAsync(id);
+            return Ok();
         }
     }
 }

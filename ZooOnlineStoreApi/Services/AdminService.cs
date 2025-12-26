@@ -45,11 +45,11 @@ namespace ZooOnlineStoreApi.Services
             Admin? adminFromDb = await _adminRepository.GetByLoginAsync(login);
             if (adminFromDb == null)
             {
-                throw new UnauthorizedAccessException("admin not found");
+                throw new UnauthorizedException("admin not found");
             }
             if (!_encoder.Verify(password, adminFromDb.Password))
             {
-                throw new UnauthorizedAccessException("error password");
+                throw new UnauthorizedException("error password");
             }
             return generateApiKey(adminFromDb);
         }

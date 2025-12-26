@@ -47,39 +47,18 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [Authorize(Roles = JwtService.ADMIN_ROLE)]
         public async Task<IActionResult> InsertAsync(CategoryRequest request)
         {
-            try
-            {
-                await categoryService.InsertAsync(request.Name);
-                CategoryResponse response = await categoryService.GetByNameAsync(request.Name);
-                return Ok(response);
-            }
-            catch (DuplicationException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return Conflict(error);
-            }
-            catch(Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
 
+            await categoryService.InsertAsync(request.Name);
+            CategoryResponse response = await categoryService.GetByNameAsync(request.Name);
+            return Ok(response);
         }
         //удаление
         [HttpDelete("{id:int}")]
         [Authorize(Roles = JwtService.ADMIN_ROLE)]
         public async Task<IActionResult> DeleteCategoryAsync(int id)
         {
-            try
-            {
-                await categoryService.DeleteAsync(id);
-                return Ok();
-            }
-            catch (NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
+            await categoryService.DeleteAsync(id);
+            return Ok();
         }
     }
 }

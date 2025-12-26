@@ -22,7 +22,7 @@ namespace ZooOnlineStoreApi.Services
             Payment? paymentFromDb = await _payments.GetByIdAsync(id);
             if (paymentFromDb == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("payment not found");
             }
             return paymentFromDb;
         }

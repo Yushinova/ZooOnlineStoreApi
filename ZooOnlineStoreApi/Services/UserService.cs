@@ -33,7 +33,7 @@ namespace ZooOnlineStoreApi.Services
             // валидация строк
             if (!Regex.IsMatch(request.Phone, phonePattern))
             {
-                throw new ValidationException("phon4", "phone is invalid", request.Phone);
+                throw new ValidationException("phone", "phone is invalid", request.Phone);
             }
             if (!Regex.IsMatch(request.Email, emailPattern))
             {
@@ -44,7 +44,7 @@ namespace ZooOnlineStoreApi.Services
             bool isLoginDuplicated = await _userRepository.GetByPhoneAsync(request.Phone) != null;
             if (isLoginDuplicated)
             {
-                throw new DuplicationException("login", request.Phone);
+                throw new DuplicationException("phone", request.Phone);
             }
             bool isEmailDuplicated = await _userRepository.GetByEmailAsync(request.Email) != null;
             if (isEmailDuplicated)
@@ -69,11 +69,11 @@ namespace ZooOnlineStoreApi.Services
             User? userFromDb = await _userRepository.GetByPhoneAsync(request.Phone);
             if (userFromDb == null)
             {
-                throw new UnauthorizedAccessException("user not found");
+                throw new UnauthorizedException("user not found");
             }
             if (!_encoder.Verify(request.Password, userFromDb.Password))
             {
-                throw new UnauthorizedAccessException("error password");
+                throw new UnauthorizedException("error password");
             }
             return generateApiKey(userFromDb);
 
@@ -88,7 +88,7 @@ namespace ZooOnlineStoreApi.Services
             User? userFromDb = await _userRepository.GetByIdAsync(id);
             if (userFromDb == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("user not found");
             }
             await _userRepository.DeleteAsync(userFromDb);
         }
@@ -97,7 +97,7 @@ namespace ZooOnlineStoreApi.Services
             User? userFromDb = await _userRepository.GetByIdAsync(id);
             if (userFromDb == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("user not found");
             }
             return _mapper.Map<UserResponse>(userFromDb);
         }
@@ -106,7 +106,7 @@ namespace ZooOnlineStoreApi.Services
             User? userFromDb = await _userRepository.GetByIdAsync(user.Id);
             if (userFromDb == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("user not found");
             }
             userFromDb.Discont = user.Discont;
             userFromDb.TotalOrders = user.TotalOrders;
@@ -126,7 +126,7 @@ namespace ZooOnlineStoreApi.Services
                     return _mapper.Map<UserResponse>(item);
                 }
             }
-            throw new NotFoundException();
+            throw new NotFoundException("user not found");
         }
         // генерация api-ключа для пользователя
         private string generateApiKey(User user)

@@ -43,82 +43,52 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateByIdAsync(int id, [FromBody] OrderUpdateRequest request)
         {
-            try
+            OrderResponse response = await orderService.UndateAsync(id, request);
+            if (request.Status.ToLower().Contains("del"))
             {
-                 OrderResponse response = await orderService.UndateAsync(id, request);
-                if (request.Status.ToLower().Contains("del"))
+                List<OrderItem>? itemsByOrderId = await orderItemService.ListAllByOrderIdAsync(id);
+                if (itemsByOrderId != null && itemsByOrderId.Count > 0)
                 {
-                    List<OrderItem>? itemsByOrderId = await orderItemService.ListAllByOrderIdAsync(id);
-                    if (itemsByOrderId != null && itemsByOrderId.Count > 0)
+                    foreach (var item in itemsByOrderId)
                     {
-                        foreach (var item in itemsByOrderId)
-                        {
-                            await productService.AddQuantityByIdAsync(item.ProductId, item.Quantity);
-                        }
+                        await productService.AddQuantityByIdAsync(item.ProductId, item.Quantity);
                     }
                 }
-                return Ok(response);
             }
-            catch (NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
+            return Ok(response);
         }
 
         [HttpPost("user")]//добавление нового заказа юзером
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> AddNewOrderAsync([FromBody] OrderRequest request)
         {
-            try
-            {
-                 OrderResponse orderInsert = await orderService.InsertAsync(request);
-                if (request.OrderItems != null && request.OrderItems.Count > 0)
-                {
-                    foreach (var item in orderInsert.OrderItems)
-                    {
-                        item.OrderId = orderInsert.Id;
-                        await productService.DeleteQuantityByIdAsync(item.ProductId, item.Quantity);//убираем количество товара
-                    }
-                }
-                UserResponse user = await userService.GetByIdAsync(request.UserId);
-                if (user != null)
-                {
-                    user.TotalOrders += orderInsert.Amount;
-                    await userService.UpdateAsync(user);
-                }
-                return Ok(orderInsert);
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
 
+            OrderResponse orderInsert = await orderService.InsertAsync(request);
+            if (request.OrderItems != null && request.OrderItems.Count > 0)
+            {
+                foreach (var item in orderInsert.OrderItems)
+                {
+                    item.OrderId = orderInsert.Id;
+                    await productService.DeleteQuantityByIdAsync(item.ProductId, item.Quantity);//убираем количество товара
+                }
+            }
+            UserResponse user = await userService.GetByIdAsync(request.UserId);
+            if (user != null)
+            {
+                user.TotalOrders += orderInsert.Amount;
+                await userService.UpdateAsync(user);
+            }
+            return Ok(orderInsert);
         }
 
         [HttpGet("user/{userId:int}")]//получение всех заказов юзером
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> ListAllByUserId(int userId)
         {
-            try
-            {
-                List<OrderResponse> orderResponse = await orderService.ListAllByUserIdAsync(userId);
-                return Ok(orderResponse);
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
 
+            List<OrderResponse> orderResponse = await orderService.ListAllByUserIdAsync(userId);
+            return Ok(orderResponse);
         }
-       
 
     }
 }

@@ -22,17 +22,8 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> InsertAsync([FromBody] AddressRequest request)
         {
-            try
-            {
-                await addressService.InsertAsync(request);
-                return Created();
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
-         
+            await addressService.InsertAsync(request);
+            return Created();
         }
 
         [HttpGet("{id:int}")]
@@ -47,17 +38,8 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> DeleteByIdAsync(int id)
         {
-            try
-            {
-                await addressService.DeleteAsync(id);
-                return Ok();
-            }
-            catch (NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
-
+            await addressService.DeleteAsync(id);
+            return Ok();
         }
     }
 }

@@ -54,7 +54,7 @@ namespace ZooOnlineStoreApi.Services
             Product? product = await _products.SelectByIdWithAllInfo(id);
             if (product == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("product not found");
             }
             return _mapper.Map<ProductResponse>(product);
 
@@ -92,7 +92,7 @@ namespace ZooOnlineStoreApi.Services
             Product? productFromDb = await _products.SelectByIdWithAllInfo(id);
             if (productFromDb == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("product not found");
             }
             productFromDb.Name = request.Name;
             productFromDb.Brand = request.Brand;
@@ -125,7 +125,7 @@ namespace ZooOnlineStoreApi.Services
             Product? productFromDb = await _products.GetByIdAsync(id);
             if (productFromDb == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("product not found");
             }
             await _products.DeleteAsync(productFromDb);
         }

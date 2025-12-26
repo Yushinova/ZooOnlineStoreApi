@@ -38,75 +38,34 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetByIdWithCategories(int id)
         {
-            try
-            {
-                PetTypeResponse response = await petTypeService.SelectByIdWithCategoties(id);
-                return Ok(response);
-            }
-            catch(NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return Conflict(error);
-            }
-
+            PetTypeResponse response = await petTypeService.SelectByIdWithCategoties(id);
+            return Ok(response);
         }
 
         [HttpPost]
         [Authorize(Roles = JwtService.ADMIN_ROLE)]
         public async Task<IActionResult> InsertAsync(PetTypeRequest request)
         {
-            try
-            {
-                await petTypeService.InsertAsync(request.Name, request.ImageName);
-                PetTypeResponse response = await petTypeService.GetByNameAsync(request.Name);
-                return Ok(response);
-            }
-            catch (DuplicationException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return Conflict(error);
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
-
+            await petTypeService.InsertAsync(request.Name, request.ImageName);
+            PetTypeResponse response = await petTypeService.GetByNameAsync(request.Name);
+            return Ok(response);
         }
 
         [HttpPatch]
         [Authorize(Roles = JwtService.ADMIN_ROLE)]
         public async Task<IActionResult> UpdatePetTypeAsync(PetTypeUpdate request)
         {
-            try
-            {
-                await petTypeService.UpdateAsync(request);
-                PetTypeResponse response = await petTypeService.SelectByIdWithCategoties(request.Id);
-                return Ok(response);
-
-            }
-            catch (NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-            }
+            await petTypeService.UpdateAsync(request);
+            PetTypeResponse response = await petTypeService.SelectByIdWithCategoties(request.Id);
+            return Ok(response);
         }
 
         [HttpDelete("{id:int}")]
         [Authorize(Roles = JwtService.ADMIN_ROLE)]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            try
-            {
-                await petTypeService.DeleteByIdAsync(id);
-                return Ok();
-            }
-            catch (NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return NotFound(error);
-
-            }
+            await petTypeService.DeleteByIdAsync(id);
+            return Ok();
         }
     }
 }

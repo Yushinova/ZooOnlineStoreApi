@@ -26,85 +26,43 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> InsertAsync([FromBody] PaymentRequest request)
         {
-            try
-            {
-                Payment payment = mapper.Map<Payment>(request);
-                //пока сделаем все оплачено
-                //payment.PaidAt = DateTime.UtcNow;
-                Payment paymentFromDb = await paymentService.InsertReturnEntityAsync(payment);
-                return Ok(mapper.Map<PaymentResponse>(paymentFromDb));
-            }
-            catch (ValidationException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
 
+            Payment payment = mapper.Map<Payment>(request);
+            //пока сделаем все оплачено
+            //payment.PaidAt = DateTime.UtcNow;
+            Payment paymentFromDb = await paymentService.InsertReturnEntityAsync(payment);
+            return Ok(mapper.Map<PaymentResponse>(paymentFromDb));
         }
 
         [HttpGet("user/{userId:int}")]
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> GetByUserIdAsync(int userId, PaymentRequestParams parameters)
         {
-            try
-            {
-                parameters.UserId = userId;
-                PaymentPagedResponse response = await paymentService.SelectWithPagination(parameters);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
+            parameters.UserId = userId;
+            PaymentPagedResponse response = await paymentService.SelectWithPagination(parameters);
+            return Ok(response);
         }
 
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> ListWithPagination([FromBody] PaymentRequestParams parameters)
         {
-            try
-            {
-                return Ok(await paymentService.SelectWithPagination(parameters));
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
+
+            return Ok(await paymentService.SelectWithPagination(parameters));
         }
 
         [HttpPatch("{id:int}")]
         [Authorize]
         public async Task<IActionResult> UpdateAsync(int id, [FromBody] PaymentRequest request)
         {
-            try
+            Payment paymentUpdated = mapper.Map<Payment>(request);
+            paymentUpdated.Id = id;
+            if (request.Status.ToLower() == PaymentStatus.Succeeded.ToString().ToLower())
             {
-                Payment paymentUpdated = mapper.Map<Payment>(request);
-                paymentUpdated.Id = id;
-                if (request.Status.ToLower() == PaymentStatus.Succeeded.ToString().ToLower())
-                {
-                    paymentUpdated.PaidAt = DateTime.UtcNow;
-                }
-                Payment paymentFromDb = await paymentService.UpdateReturnEntityAsync(paymentUpdated);
-                return Ok(mapper.Map<PaymentResponse>(paymentFromDb));
+                paymentUpdated.PaidAt = DateTime.UtcNow;
             }
-            catch (NotFoundException ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-                return BadRequest(error);
-            }
-
+            Payment paymentFromDb = await paymentService.UpdateReturnEntityAsync(paymentUpdated);
+            return Ok(mapper.Map<PaymentResponse>(paymentFromDb));
         }
     }
 

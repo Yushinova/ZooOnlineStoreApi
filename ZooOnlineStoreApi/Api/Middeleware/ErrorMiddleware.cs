@@ -1,49 +1,12 @@
 ﻿using Microsoft.AspNetCore.WebUtilities;
+using ZooOnlineStoreApi.Api.Jwt;
 using ZooOnlineStoreApi.Services.Exeptions;
 
 namespace ZooOnlineStoreApi.Api.Middeleware
 {
-    //public class ErrorMiddleware: MiddlewareBase
-    //{
-    //    public ErrorMiddleware(RequestDelegate next) : base(next) { }
-
-    //    public override async Task InvokeAsync(HttpContext context)
-    //    {
-    //        try
-    //        {
-    //            await _next(context);
-    //            // process 4xx (excepting errors by our methods)
-    //            int statusCode = context.Response.StatusCode;
-    //            if (statusCode / 100 == 4 && !context.Response.HasStarted)
-    //            {
-    //                string message = ReasonPhrases.GetReasonPhrase(statusCode);
-    //                ErrorMessage error = new ErrorMessage(Type: statusCode.ToString(), Message: message);
-    //                await context.Response.WriteAsJsonAsync(error);
-    //            }
-    //        }
-    //        catch (Exception ex)
-    //        {
-    //            // process 500
-    //            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-    //            ErrorMessage error = new ErrorMessage(Type: ex.GetType().Name, Message: ex.Message);
-    //            await context.Response.WriteAsJsonAsync(error);
-    //        }
-    //    }
-    //}
-
     public class ErrorMiddleware : MiddlewareBase
     {
-        private readonly ILogger<ErrorMiddleware> _logger;
-        private readonly IWebHostEnvironment _env;
-
-        public ErrorMiddleware(
-            RequestDelegate next,
-            ILogger<ErrorMiddleware> logger,
-            IWebHostEnvironment env) : base(next)
-        {
-            _logger = logger;
-            _env = env;
-        }
+        public ErrorMiddleware(RequestDelegate next) : base(next) { }
 
         public override async Task InvokeAsync(HttpContext context)
         {
@@ -51,66 +14,83 @@ namespace ZooOnlineStoreApi.Api.Middeleware
             {
                 await _next(context);
 
-                // Обрабатываем 4xx ошибки только если нет тела
-                if (context.Response.StatusCode / 100 == 4 &&
-                    !context.Response.HasStarted &&
-                    context.Response.ContentLength == 0)
+                //обработка HTTP ошибок
+                if (context.Response.StatusCode >= 400 && !context.Response.HasStarted)
                 {
                     string message = ReasonPhrases.GetReasonPhrase(context.Response.StatusCode);
-                    ErrorMessage error = new ErrorMessage(
-                        Type: context.Response.StatusCode.ToString(),
-                        Message: message
-                    );
-                    await WriteSafeJsonAsync(context, error);
+                    var error = new//создает JSON-объект
+                    {
+                        Type = context.Response.StatusCode.ToString(),
+                        Message = message
+                    };
+                    await context.Response.WriteAsJsonAsync(error);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unhandled exception");
-
-                // Определяем статус код для кастомных исключений
-                var statusCode = ex switch
+                if (ex is DuplicationException dupEx)
                 {
-                    ValidationException => 400,
-                    DuplicationException => 409,
-                    NotFoundException => 404,
-                    UnauthorizedAccessException => 401,
-                    _ => 500
+                    context.Response.StatusCode = 409;
+                    var error = new
+                    {
+                        Type = "Duplication",
+                        Message = dupEx.Message,
+                        Field = dupEx.TargetName,
+                        Value = dupEx.Value
+                    };
+                    await context.Response.WriteAsJsonAsync(error);
+                    return;
+                }
+
+                if (ex is ValidationException valEx)
+                {
+                    context.Response.StatusCode = 400;
+                    var error = new
+                    {
+                        Type = "Validation",
+                        Message = valEx.Message,
+                        Field = valEx.TargetName,
+                        Value = valEx.Value,
+                        Details = valEx.Details
+                    };
+                    await context.Response.WriteAsJsonAsync(error);
+                    return;
+                }
+
+                if (ex is UnauthorizedException || ex is InvalidApiKeyException)
+                {
+                    context.Response.StatusCode = 401;
+                    var error = new
+                    {
+                        Type = "Authentication",
+                        Message = ex.Message
+                    };
+                    await context.Response.WriteAsJsonAsync(error);
+                    return;
+                }
+
+                if (ex is NotFoundException)
+                {
+                    context.Response.StatusCode = 404;
+                    var error = new
+                    {
+                        Type = "NotFound",
+                        Message = ex.Message
+                    };
+                    await context.Response.WriteAsJsonAsync(error);
+                    return;
+                }
+
+                //все остальные исключения - как в вашем исходном коде
+                context.Response.StatusCode = 500;
+                var genericError = new
+                {
+                    Type = ex.GetType().Name,
+                    Message = ex.Message
                 };
-
-                context.Response.StatusCode = statusCode;
-
-                // Для production скрываем детали 500 ошибок
-                var message = (statusCode == 500 && !_env.IsDevelopment())
-                    ? "An internal server error occurred"
-                    : ex.Message;
-
-                ErrorMessage error = new ErrorMessage(
-                    Type: ex.GetType().Name,
-                    Message: message
-                );
-
-                await WriteSafeJsonAsync(context, error);
+                await context.Response.WriteAsJsonAsync(genericError);
             }
-        }
-
-        private async Task WriteSafeJsonAsync(HttpContext context, object error)
-        {
-            // Проверяем, можно ли писать
-            if (context.Response.HasStarted)
-            {
-                _logger.LogWarning("Cannot write error response - response already started");
-                return;
-            }
-
-            // Сбрасываем буфер
-            context.Response.Clear();
-
-            // Устанавливаем Content-Type
-            context.Response.ContentType = "application/json";
-
-            // Записываем
-            await context.Response.WriteAsJsonAsync(error);
         }
     }
+
 }

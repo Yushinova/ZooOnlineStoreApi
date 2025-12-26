@@ -29,7 +29,7 @@ namespace ZooOnlineStoreApi.Services
             Address? addressFromDb = await _addressRepository.GetByIdAsync(id);
             if (addressFromDb == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("address not found");
             }
             await _addressRepository.DeleteAsync(addressFromDb);
         }

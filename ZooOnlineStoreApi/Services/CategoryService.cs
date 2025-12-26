@@ -40,7 +40,7 @@ namespace ZooOnlineStoreApi.Services
             Category? categoryFromDb = await _categories.SelectByName(name);
             if (categoryFromDb == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("category not found");
             }
             return _mapper.Map<CategoryResponse>(categoryFromDb);
         }
@@ -49,7 +49,7 @@ namespace ZooOnlineStoreApi.Services
             Category? category = await _categories.GetByIdAsync(id);
             if (category == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("category not found");
             }
             return _mapper.Map<CategoryResponse>(category);
         }
@@ -58,7 +58,7 @@ namespace ZooOnlineStoreApi.Services
             Category? categoryDeleted = await _categories.GetByIdAsync(id);
             if (categoryDeleted == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("category not found");
 
             }
 

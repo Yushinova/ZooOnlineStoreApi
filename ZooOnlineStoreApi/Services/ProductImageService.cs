@@ -31,7 +31,7 @@ namespace ZooOnlineStoreApi.Services
             ProductImage? imageDeleted = await _productImages.GetByIdAsync(id);
             if ( imageDeleted == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("image not found");
             }
             await _productImages.DeleteAsync(imageDeleted);
         }
@@ -40,7 +40,7 @@ namespace ZooOnlineStoreApi.Services
             ProductImage? imageDeleted = await _productImages.GetByNameAsync(name);
             if (imageDeleted == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("image not found");
             }
             await _productImages.DeleteAsync(imageDeleted);
         }
