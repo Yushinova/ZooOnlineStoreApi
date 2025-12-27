@@ -28,7 +28,6 @@ namespace ZooOnlineStoreApi.Api.Controllers
             this.userService = userService;
         }
 
-        //работа с заказами все авторизованные админы
         [HttpGet("admin")]//с пагинацией все заказы
         [Authorize]
         public async Task<ActionResult> GetOrdersSorted([FromQuery] int page, [FromQuery] int pageSize)
@@ -85,7 +84,6 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> ListAllByUserId(int userId)
         {
-
             List<OrderResponse> orderResponse = await orderService.ListAllByUserIdAsync(userId);
             return Ok(orderResponse);
         }

@@ -7,7 +7,7 @@ namespace ZooOnlineStoreApi.Services.Interfaces
     public interface IProductRepository: IRepository<Product>
     {
         Task<Product?> SelectByIdWithAllInfo(int id);
-        IQueryable<Product> SelectAllWithImagesAndPetTypesAsync();
+        IQueryable<Product> SelectAllWithImagesAndPetTypes();
         Task<Product> InsertAndReturnAsync(Product entity);
     }
 }

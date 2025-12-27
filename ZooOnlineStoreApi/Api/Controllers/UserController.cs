@@ -13,7 +13,6 @@ namespace ZooOnlineStoreApi.Api.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserService userService;
-
         public UserController(UserService userService)
         {
             this.userService = userService;
@@ -39,25 +38,14 @@ namespace ZooOnlineStoreApi.Api.Controllers
             string apiKey = await userService.LoginAsync(request);
             return Ok(apiKey);
         }
-
-        //[HttpGet]//test
-        //[Authorize]
-        //public async Task<IActionResult> ListAllAsync()
-        //{
-        //    List<User> usersFromDb = await userService.ListAllAsync();
-        //    return Ok(mapper.Map<List<UserResponse>>(usersFromDb));
-        //}
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetInfoAsync([FromHeader(Name = "X-Api-Key")] string apiKey)
         {
-
             UserResponse response = await userService.GetUserAsync(apiKey);
             // 200
             return Ok(response);
-
         }
-
         [HttpGet("{id:int}")]
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> GetByIdAsync(int id)
@@ -65,7 +53,6 @@ namespace ZooOnlineStoreApi.Api.Controllers
             UserResponse response = await userService.GetByIdAsync(id);
             return Ok(response);
         }
-
         [HttpDelete("{id:int}")]
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> DeleteByIdAsync(int id)

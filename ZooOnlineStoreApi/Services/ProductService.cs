@@ -42,7 +42,7 @@ namespace ZooOnlineStoreApi.Services
         {
             if (parameters.Page < 1) parameters.Page = 1;
             if (parameters.PageSize < 1) parameters.PageSize = 10;
-            IQueryable<Product> query = _products.SelectAllWithImagesAndPetTypesAsync();
+            IQueryable<Product> query = _products.SelectAllWithImagesAndPetTypes();
             query = ProductQueryBuilder.BuildQuery(query, parameters);
             int skip = (parameters.Page - 1) * parameters.PageSize;
             //pagination

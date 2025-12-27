@@ -36,35 +36,35 @@ namespace ZooOnlineStoreApi.Api.Jwt
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = GetIssuerSigningKey()
             };
-            // ⚡ ВАЖНО: Добавляем логику для работы с куками
+            // добавляем логику для работы с куками
             options.Events = new JwtBearerEvents
             {
                 OnMessageReceived = context =>
                 {
-                    // Пробуем получить токен из кук
+                    //пробуем получить токен из кук
                     if (context.Request.Cookies.TryGetValue("adminToken", out var adminToken))
                     {
                         context.Token = adminToken;
                         Console.WriteLine("JWT token taken from adminToken cookie");
                     }
-                    // Также проверяем userToken для пользователей
+                    //проверяем userToken для пользователей
                     else if (context.Request.Cookies.TryGetValue("userToken", out var userToken))
                     {
                         context.Token = userToken;
                         Console.WriteLine("JWT token taken from userToken cookie");
                     }
-                    // Если нет в куках, оставляем стандартную логику из header (для Postman)
+                    //если нет в куках, оставляем стандартную логику из header (для Postman)
                     return Task.CompletedTask;
                 },
 
-                // Опционально: логирование ошибок аутентификации
+                //логирование ошибок аутентификации
                 OnAuthenticationFailed = context =>
                 {
                     Console.WriteLine($"JWT Authentication failed: {context.Exception.Message}");
                     return Task.CompletedTask;
                 },
 
-                // Опционально: логирование успешной аутентификации
+                //логирование успешной аутентификации
                 OnTokenValidated = context =>
                 {
                     var userName = context.Principal.Identity.Name;

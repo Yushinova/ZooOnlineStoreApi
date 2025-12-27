@@ -29,7 +29,7 @@ namespace ZooOnlineStoreApi.Storage
             _context.Update(entity);
             await _context.SaveChangesAsync();
         }
-        public IQueryable<Product> SelectAllWithImagesAndPetTypesAsync()
+        public IQueryable<Product> SelectAllWithImagesAndPetTypes()
         {
             return _context.Products.Include(p => p.ProductImages)
                 .Include(p => p.PetTypes).AsQueryable();//тут все приходят

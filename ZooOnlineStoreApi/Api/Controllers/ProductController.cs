@@ -17,22 +17,18 @@ namespace ZooOnlineStoreApi.Api.Controllers
         {
             this.productService = productService;
         }
-
         [HttpGet]
         public async Task<IActionResult> GetAllWithFilterAndPagination([FromQuery] ProductQueryParameters parameters)
         {
             List<ProductResponse> response = await productService.SuperPagination(parameters);
             return Ok(response);
         }
-
-
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetByIdWithAllInfoAsync(int id)
         {
             ProductResponse response = await productService.SelectByIdWithAllInfoAsync(id);
             return Ok(response);
         }
-
         //работа с продуктами (только роль админ)
         [HttpPost("admin")]
         [Authorize(Roles = JwtService.ADMIN_ROLE)]
@@ -40,9 +36,7 @@ namespace ZooOnlineStoreApi.Api.Controllers
         {
             ProductResponse response = await productService.InsertAsync(request);
             return Ok(response);
-
         }
-
         [HttpPatch("admin/{id:int}")]
         [Authorize(Roles = JwtService.ADMIN_ROLE)]
         public async Task<IActionResult> UpdateByIdAsync(int id, [FromBody] ProductRequest request)
