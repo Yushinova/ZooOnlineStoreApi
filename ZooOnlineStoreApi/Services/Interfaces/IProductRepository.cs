@@ -9,5 +9,7 @@ namespace ZooOnlineStoreApi.Services.Interfaces
         Task<Product?> SelectByIdWithAllInfo(int id);
         IQueryable<Product> SelectAllWithImagesAndPetTypes();
         Task<Product> InsertAndReturnAsync(Product entity);
+        Task AddQuantityByIdAsync(int productId, int quantity);
+        Task DeleteQuantityByIdAsync(int productId, int quantity);
     }
 }

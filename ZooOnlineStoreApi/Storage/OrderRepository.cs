@@ -23,7 +23,7 @@ namespace ZooOnlineStoreApi.Storage
                 .Include(o=>o.Payment)
                 .FirstOrDefaultAsync(o => o.Id == id);
         }
-        public async Task<Order> InsertReturnEntityAsync(Order entity)
+        public async Task<Order?> InsertReturnEntityAsync(Order entity)
         {
             await _context.AddAsync(entity);
             await _context.SaveChangesAsync();

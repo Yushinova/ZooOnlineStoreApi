@@ -56,5 +56,32 @@ namespace ZooOnlineStoreApi.Storage
                 .Include(p => p.PetTypes)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
+        public async Task DeleteQuantityByIdAsync(int id, int quantity)
+        {
+            Product? productFromDb = await GetByIdAsync(id);
+            if (productFromDb != null)
+            {
+                if (productFromDb.Quantity >= quantity)
+                {
+                    productFromDb.Quantity -= quantity;
+                }
+                if (productFromDb.Quantity <= 0)
+                {
+                    productFromDb.isActive = false;
+                }
+                await UpdateAsync(productFromDb);
+            }
+        }
+        public async Task AddQuantityByIdAsync(int id, int quantity)
+        {
+            Product? productFromDb = await GetByIdAsync(id);
+            if (productFromDb != null)
+            {
+                productFromDb.Quantity += quantity;
+                productFromDb.isActive = true;
+                await UpdateAsync(productFromDb);
+            }
+
+        }
     }
 }

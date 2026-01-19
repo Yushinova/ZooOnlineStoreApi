@@ -13,28 +13,19 @@ namespace ZooOnlineStoreApi.Api.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly OrderService orderService;
-        private readonly ProductService productService;
-        private readonly OrderItemService orderItemService;
-        private readonly UserService userService;
-        public OrderController(OrderService orderService,
-                ProductService productService,
-                OrderItemService orderItemService,
-                UserService userService)
+        private readonly OrderService _orderService;
+
+        public OrderController(OrderService orderService)
         {
-            this.orderService = orderService;
-            this.productService = productService;
-            this.orderItemService = orderItemService;
-            this.userService = userService;
+            _orderService = orderService;
         }
 
-        [HttpGet("admin")]//с пагинацией все заказы
+        [HttpGet("admin")]
         [Authorize]
         public async Task<ActionResult> GetOrdersSorted([FromQuery] int page, [FromQuery] int pageSize)
         {
             Console.WriteLine("page: " + page + "size: " + pageSize);
-            List<OrderResponse>? response = await orderService.ListPaginationAsync(page, pageSize);
-
+            List<OrderResponse>? response = await _orderService.ListPaginationAsync(page, pageSize);
             return Ok(response);
         }
 
@@ -42,51 +33,24 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateByIdAsync(int id, [FromBody] OrderUpdateRequest request)
         {
-            OrderResponse response = await orderService.UndateAsync(id, request);
-            if (request.Status.ToLower().Contains("del"))
-            {
-                List<OrderItem>? itemsByOrderId = await orderItemService.ListAllByOrderIdAsync(id);
-                if (itemsByOrderId != null && itemsByOrderId.Count > 0)
-                {
-                    foreach (var item in itemsByOrderId)
-                    {
-                        await productService.AddQuantityByIdAsync(item.ProductId, item.Quantity);
-                    }
-                }
-            }
+            OrderResponse response = await _orderService.UndateAsync(id, request);
             return Ok(response);
         }
 
-        [HttpPost("user")]//добавление нового заказа юзером
+        [HttpPost("user")]
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> AddNewOrderAsync([FromBody] OrderRequest request)
         {
-
-            OrderResponse orderInsert = await orderService.InsertAsync(request);
-            if (request.OrderItems != null && request.OrderItems.Count > 0)
-            {
-                foreach (var item in orderInsert.OrderItems)
-                {
-                    item.OrderId = orderInsert.Id;
-                    await productService.DeleteQuantityByIdAsync(item.ProductId, item.Quantity);//убираем количество товара
-                }
-            }
-            UserResponse user = await userService.GetByIdAsync(request.UserId);
-            if (user != null)
-            {
-                user.TotalOrders += orderInsert.Amount;
-                await userService.UpdateAsync(user);
-            }
+            OrderResponse orderInsert = await _orderService.InsertAsync(request);
             return Ok(orderInsert);
         }
 
-        [HttpGet("user/{userId:int}")]//получение всех заказов юзером
+        [HttpGet("user/{userId:int}")]
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> ListAllByUserId(int userId)
         {
-            List<OrderResponse> orderResponse = await orderService.ListAllByUserIdAsync(userId);
+            List<OrderResponse> orderResponse = await _orderService.ListAllByUserIdAsync(userId);
             return Ok(orderResponse);
         }
-
     }
 }
