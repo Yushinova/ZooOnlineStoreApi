@@ -31,15 +31,15 @@ namespace ZooOnlineStoreApi.Services
             PaymentFilter filter = _mapper.Map<PaymentFilter>(parameters);
             return _mapper.Map<PaymentPagedResponse>( await _payments.SelectWithPagination(filter));
         }
-        public async Task<Payment> InsertReturnEntityAsync(Payment entity)
+        public async Task<PaymentResponse> InsertReturnEntityAsync(PaymentRequest request)
         {
-            //validation
-            Payment payment = await _payments.InsertReturnEntityAsync(entity);
+            Payment payment = _mapper.Map<Payment>(request);
+            Payment newpayment = await _payments.InsertReturnEntityAsync(payment);
             if (payment == null)
             {
                 throw new Exception("Payment save exception");
             }
-            return payment;
+            return _mapper.Map<PaymentResponse>(newpayment);
         }
 
         public async Task<List<Payment>> SelectAllAsync()
@@ -52,16 +52,21 @@ namespace ZooOnlineStoreApi.Services
             return await _payments.SelectAllByUserIdAsync(userId);
         }
 
-        public async Task<Payment> UpdateReturnEntityAsync(Payment entity)
+        public async Task<PaymentResponse> UpdateReturnEntityAsync(int id, PaymentRequest request)
         {
-            Payment? paymentFromDb = await _payments.GetByIdAsync(entity.Id);
+            Payment paymentUpdated = _mapper.Map<Payment>(request);
+            if (request.Status.ToLower() == PaymentStatus.Succeeded.ToString().ToLower())
+            {
+                paymentUpdated.PaidAt = DateTime.UtcNow;
+            }
+            Payment? paymentFromDb = await _payments.GetByIdAsync(id);
             if (paymentFromDb == null)
             {
                 throw new NotFoundException();
             }
-            paymentFromDb.Status = entity.Status;
-            paymentFromDb.PaidAt = entity.PaidAt;
-            return await _payments.UpdateReturnEntityAsync(paymentFromDb);
+            paymentFromDb.Status = paymentUpdated.Status;
+            paymentFromDb.PaidAt = paymentUpdated.PaidAt;
+            return _mapper.Map<PaymentResponse>(await _payments.UpdateReturnEntityAsync(paymentFromDb));
         }
     }
 }

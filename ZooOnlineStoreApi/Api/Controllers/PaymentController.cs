@@ -14,24 +14,20 @@ namespace ZooOnlineStoreApi.Api.Controllers
     [ApiController]
     public class PaymentController : ControllerBase
     {
-        private readonly IMapper mapper;
         private readonly PaymentService paymentService;
-        public PaymentController(PaymentService paymentService, IMapper mapper)
+        public PaymentController(PaymentService paymentService)
         {
             this.paymentService = paymentService;
-            this.mapper = mapper;
         }
 
         [HttpPost]
         [Authorize(Roles = JwtService.USER_ROLE)]
         public async Task<IActionResult> InsertAsync([FromBody] PaymentRequest request)
         {
-
-            Payment payment = mapper.Map<Payment>(request);
             //пока сделаем все оплачено
             //payment.PaidAt = DateTime.UtcNow;
-            Payment paymentFromDb = await paymentService.InsertReturnEntityAsync(payment);
-            return Ok(mapper.Map<PaymentResponse>(paymentFromDb));
+            PaymentResponse newpayment = await paymentService.InsertReturnEntityAsync(request);
+            return Ok(newpayment);
         }
 
         [HttpGet("user/{userId:int}")]
@@ -55,14 +51,8 @@ namespace ZooOnlineStoreApi.Api.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateAsync(int id, [FromBody] PaymentRequest request)
         {
-            Payment paymentUpdated = mapper.Map<Payment>(request);
-            paymentUpdated.Id = id;
-            if (request.Status.ToLower() == PaymentStatus.Succeeded.ToString().ToLower())
-            {
-                paymentUpdated.PaidAt = DateTime.UtcNow;
-            }
-            Payment paymentFromDb = await paymentService.UpdateReturnEntityAsync(paymentUpdated);
-            return Ok(mapper.Map<PaymentResponse>(paymentFromDb));
+            PaymentResponse payment = await paymentService.UpdateReturnEntityAsync(id, request);
+            return Ok(payment);
         }
     }
 
