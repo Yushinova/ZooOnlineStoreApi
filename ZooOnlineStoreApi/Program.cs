@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+п»їusing Microsoft.AspNetCore.Authentication.JwtBearer;
 using ZooOnlineStoreApi.Api.Jwt;
 using ZooOnlineStoreApi.Api.Middeleware;
 using ZooOnlineStoreApi.Crypto;
@@ -6,6 +6,8 @@ using ZooOnlineStoreApi.Services;
 using ZooOnlineStoreApi.Services.DTOs;
 using ZooOnlineStoreApi.Services.Interfaces;
 using ZooOnlineStoreApi.Storage;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
@@ -14,13 +16,72 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000", "https://localhost:3000", "http://localhost:3001", "https://localhost:3001")
+            policy.WithOrigins("http://localhost:3000",
+                               "https://localhost:3000",
+                               "http://localhost:3001",
+                               "https://localhost:3001",
+                               "http://zoo-admin.localhost:3000",
+                               "http://zoo-customer.localhost:3001")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
         });
 });
 builder.Services.AddControllers();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "ZooOnlineStore API",
+        Version = "v1",
+        Description = "Zoo Online Store API"
+    });
+    // XML РґРѕРєСѓРјРµРЅС‚Р°С†РёСЏ
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+    if (File.Exists(xmlPath))
+    {
+        options.IncludeXmlComments(xmlPath);
+    }
+
+    // РќР°СЃС‚СЂРѕР№РєР° JWT РґР»СЏ Swagger
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = @"
+                    рџ“‹ Step-by-step:
+                    1пёЏ Get token: POST /api/SwaggerTest/admin-token (test)
+                       OR POST /api/SwaggerTest/user-token (test)
+                    2пёЏ Copy 'Token' value from response
+                    3пёЏ Click рџ”’ Authorize button above
+                    4пёЏ Enter: Bearer [your_token]
+                    5пёЏ Click Authorize в†’ Close
+                    6пёЏ Test any protected endpoint
+                    ",
+        In = ParameterLocation.Header
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
 builder.Services.AddTransient(opts => EncoderFactory.CreateEncoderFactory());
 builder.Services.AddDbContext<ApplicationDbContext>();
 builder.Services.AddTransient<CategoryService>();
@@ -48,7 +109,7 @@ builder.Services.AddTransient<IPaymentRepository, PaymentRepository>();
 builder.Services.AddTransient<PaymentService>();
 builder.Services.AddAutoMapper(options => options.AddProfile<MappingProfiles>());
 
-// сервисы аутентификации и авторизации
+// СЃРµСЂРІРёСЃС‹ Р°СѓС‚РµРЅС‚РёС„РёРєР°С†РёРё Рё Р°РІС‚РѕСЂРёР·Р°С†РёРё
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(JwtService.ConfigureJwtOptions);
@@ -62,9 +123,14 @@ app.UseRouting();
 app.UseMiddleware<ErrorMiddleware>();
 app.UseCors(MyAllowSpecificOrigins);
 
-// добавить middleware аутентификации и авторизации
+// РґРѕР±Р°РІРёС‚СЊ middleware Р°СѓС‚РµРЅС‚РёС„РёРєР°С†РёРё Рё Р°РІС‚РѕСЂРёР·Р°С†РёРё
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "ZooOnlineStore API v1");
+    options.RoutePrefix = "docs";
+});
 app.MapControllers();
 app.Run();

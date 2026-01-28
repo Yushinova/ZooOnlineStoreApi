@@ -64,6 +64,7 @@ namespace ZooOnlineStoreApi.Services
             {
                 throw new NotFoundException("order not found");
             }
+            orderFromDb.ShippingAddress = request.ShippingAddress;
             orderFromDb.ShippingCost = request.ShippingCost;
             orderFromDb.Status = request.Status;
             Order orderUpdated = await _orderRepository.UpdateReturnEntityAsync(orderFromDb);

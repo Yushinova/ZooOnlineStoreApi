@@ -1,7 +1,10 @@
-﻿namespace ZooOnlineStoreApi.Services.DTOs.Requests
+﻿using System.ComponentModel;
+
+namespace ZooOnlineStoreApi.Services.DTOs.Requests
 {
     public class CategoryRequest
     {
-        public string Name { get; set; }
+        [DefaultValue("Test")]
+        public string Name { get; set; } = string.Empty;
     }
 }

@@ -1,4 +1,6 @@
 ﻿
+using System.ComponentModel;
+
 namespace ZooOnlineStoreApi.Services.DTOs.Requests
 {
     public class FeedbackRequest

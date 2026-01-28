@@ -7,7 +7,7 @@ namespace ZooOnlineStoreApi.Services.DTOs.Requests
         public string Description { get; set; } = string.Empty;
         public decimal Price { get; set; }
         public decimal CostPrice { get; set; }
-        public int Quantity { get; set; }
+        public int Quantity { get; set; } = 0;
         public string Brand { get; set; } = string.Empty;
         public double Rating { get; set; } = 0;
         public bool isPromotion { get; set; } = false;
